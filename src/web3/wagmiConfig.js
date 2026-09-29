@@ -5,7 +5,7 @@ import { AKN_CHAIN } from "../config/aknRuntime";
 
 const chains = AKN_CHAIN.id === bsc.id ? [bsc, bscTestnet] : [bscTestnet, bsc];
 const bscRpcUrl = import.meta.env.VITE_BSC_RPC_URL || "https://bsc-dataseed.binance.org";
-const bscTestnetRpcUrl = import.meta.env.VITE_BSC_TESTNET_RPC_URL || "https://bsc-testnet.publicnode.com";
+const bscTestnetRpcUrl = import.meta.env.VITE_BSC_TESTNET_RPC_URL || "https://data-seed-prebsc-1-s1.bnbchain.org:8545";
 const walletConnectProjectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID;
 const appName = "AKN";
 const rpcBatchWait = 16;
