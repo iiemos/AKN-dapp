@@ -1,15 +1,18 @@
-import { useEffect } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import { useNetworkProfile } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
-import { useToast } from "./Toast";
+import { useI18n } from "../i18n/locale";
 import { getActionErrorMessage } from "../utils/walletErrors";
+import ReferralBindModal from "./ReferralBindModal";
+import { useToast } from "./Toast";
 
 const TABS = [
-  { to: "/", label: "首页", icon: "home" },
-  { to: "/invest", label: "投资", icon: "invest" },
-  { to: "/team", label: "团队", icon: "team" },
-  { to: "/me", label: "我的", icon: "me" },
+  { to: "/", zh: "首页", en: "Home", icon: "home" },
+  { to: "/invest", zh: "投资", en: "Invest", icon: "invest" },
+  { to: "/team", zh: "团队", en: "Team", icon: "team" },
+  { to: "/me", zh: "我的", en: "Me", icon: "me" },
 ];
 
 function TabIcon({ name }) {
@@ -50,57 +53,109 @@ function TabIcon({ name }) {
 }
 
 export default function AppShell() {
-  const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
   const wallet = useWalletConnector();
+  const { locale, setLocale, t } = useI18n();
+  const profileQuery = useNetworkProfile(wallet.currentAddress);
+  const [langOpen, setLangOpen] = useState(false);
+  const [bindDismissed, setBindDismissed] = useState("");
+  const langRef = useRef(null);
+  const bindOpen = Boolean(
+    wallet.isConnected
+    && wallet.currentAddress
+    && profileQuery.data
+    && !profileQuery.data.registered
+    && bindDismissed !== wallet.currentAddress,
+  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (!langOpen) return undefined;
+    function onPointerDown(event) {
+      if (!langRef.current?.contains(event.target)) setLangOpen(false);
+    }
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [langOpen]);
+
   async function onWalletClick() {
     if (wallet.isConnected) {
-      navigate("/me");
+      try {
+        await wallet.disconnectWallet();
+        toast(t("钱包已断开", "Wallet disconnected"));
+      } catch (error) {
+        toast(getActionErrorMessage(error), "err");
+      }
       return;
     }
     try {
       await wallet.connectWallet();
-      toast("钱包已连接", "ok");
+      toast(t("钱包已连接", "Wallet connected"), "ok");
     } catch (error) {
       toast(getActionErrorMessage(error), "err");
     }
   }
 
+  function chooseLocale(next) {
+    setLocale(next);
+    setLangOpen(false);
+  }
+
   return (
     <div className="app">
       <header className="app-head">
-        <img className="hlogo" src={logo} alt="AKN" />
-        <div>
-          <div className="wm"><span className="a">A</span><span className="k">K</span><span className="n">N</span></div>
-          <div className="wm-tg">CODE · <span style={{ color: "var(--brand)" }}>LIQUIDITY</span> · CONSENSUS</div>
+        <div className="head-brand">
+          <img className="hlogo" src={logo} alt="AKN" />
+          <div className="head-name">
+            <div className="wm"><span className="a">A</span><span className="k">K</span><span className="n">N</span></div>
+            <div className="wm-tg">
+              <div>CODE · <span style={{ color: "var(--brand)" }}>LIQUIDITY</span> ·</div>
+              <div>CONSENSUS</div>
+            </div>
+          </div>
         </div>
-        <button className={`wallet-pill${wallet.isConnected ? "" : " off"}`} type="button" onClick={onWalletClick}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="2" y="6" width="20" height="14" rx="2" />
-            <path d="M16 13h2" />
-            <path d="M2 10h20" />
-          </svg>
-          <span>{wallet.isConnecting ? "连接中" : wallet.isConnected ? wallet.shortAddress : "连接钱包"}</span>
-          <svg className="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
-            <path d="m9 18 6-6-6-6" />
-          </svg>
-        </button>
+        <div className="head-actions">
+          <button className={`wallet-pill${wallet.isConnected ? "" : " off"}`} type="button" onClick={onWalletClick}>
+            <span className="wallet-dot" />
+            <span className="wallet-addr">{wallet.isConnecting ? t("连接中", "Connecting") : wallet.isConnected ? wallet.shortAddress : t("连接钱包", "Connect")}</span>
+            {wallet.isConnected ? (
+              <svg className="wallet-exit" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em" viewBox="0 0 24 24">
+                <path fill="currentColor" d="m17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5M4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4z" />
+              </svg>
+            ) : null}
+          </button>
+          <div className="lang-wrap" ref={langRef}>
+            <button className="lang-btn" type="button" aria-label={t("切换语言", "Language")} aria-expanded={langOpen} onClick={() => setLangOpen((open) => !open)}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M3 12h18" />
+                <path d="M12 3a14 14 0 0 1 0 18" />
+                <path d="M12 3a14 14 0 0 0 0 18" />
+              </svg>
+            </button>
+            {langOpen ? (
+              <div className="lang-menu">
+                <button type="button" className={locale === "zh" ? "on" : ""} onClick={() => chooseLocale("zh")}>中文</button>
+                <button type="button" className={locale === "en" ? "on" : ""} onClick={() => chooseLocale("en")}>English</button>
+              </div>
+            ) : null}
+          </div>
+        </div>
       </header>
       <Outlet />
       <nav className="tabbar">
         {TABS.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.to === "/"} className={({ isActive }) => `tab${isActive ? " on" : ""}`}>
             <TabIcon name={tab.icon} />
-            {tab.label}
+            {t(tab.zh, tab.en)}
           </NavLink>
         ))}
       </nav>
+      {bindOpen ? <ReferralBindModal onClose={() => setBindDismissed(wallet.currentAddress)} /> : null}
     </div>
   );
 }
