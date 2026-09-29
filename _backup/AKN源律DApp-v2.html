@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AKN · 源律 DApp</title>
+<link rel="icon" href="assets/icon.png">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+:root{
+  --bg:#04060C; --bg2:#080D1A;
+  --gold:#E4BC4E; --gold-deep:#B8902C; --gold-soft:rgba(228,188,78,.13);
+  --blue:#3B92FF; --blue-bright:#6FC0FF; --blue-deep:#1556C8; --blue-soft:rgba(59,146,255,.12);
+  --text:#EAF0FA; --muted:#8C97AB; --faint:#5C6678;
+  --line:rgba(255,255,255,.09); --line-gold:rgba(228,188,78,.35); --line-blue:rgba(59,146,255,.35);
+  --r:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans SC','Chakra Petch',-apple-system,sans-serif;
+  background:var(--bg); color:var(--text); min-height:100vh;
+  -webkit-font-smoothing:antialiased; line-height:1.6;
+}
+.mono{font-family:'Chakra Petch',ui-monospace,monospace}
+/* 背景氛围 */
+.bg-fx{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(680px 420px at 12% -8%, rgba(59,146,255,.17), transparent 62%),
+    radial-gradient(760px 460px at 92% -6%, rgba(228,188,78,.10), transparent 58%),
+    radial-gradient(900px 600px at 50% 115%, rgba(21,86,200,.12), transparent 60%);
+}
+.bg-fx::after{content:"";position:absolute;inset:0;opacity:.5;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:56px 56px;mask:radial-gradient(800px 500px at 50% 0%,#000,transparent 75%);}
+/* 导航 */
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);
+  background:rgba(4,6,12,.78);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1180px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--text)}
+.brand img{width:42px;height:42px;border-radius:50%}
+.brand-txt .wm{font-family:'Chakra Petch',monospace;font-weight:700;font-size:21px;letter-spacing:2px;line-height:1}
+.brand-txt .wm .a{color:var(--gold)}.brand-txt .wm .k{color:#fff}.brand-txt .wm .n{color:var(--blue-bright)}
+.brand-txt .tg{font-family:'Chakra Petch',monospace;font-size:8.5px;letter-spacing:2.6px;color:var(--faint);margin-top:3px}
+.nav-links{display:flex;gap:6px;margin-left:auto}
+.nav-tab{font-family:'Noto Sans SC',sans-serif;font-size:14px;color:var(--muted);background:none;border:0;cursor:pointer;
+  padding:8px 16px;border-radius:10px;transition:.2s;white-space:nowrap}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.nav-tab.active{color:var(--gold);background:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--line-gold)}
+.wallet-chip{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:10px;cursor:pointer;
+  background:rgba(59,146,255,.1);border:1px solid var(--line-blue);color:var(--blue-bright);
+  font-family:'Chakra Petch',monospace;font-size:13px;transition:.2s;white-space:nowrap}
+.wallet-chip:hover{background:rgba(59,146,255,.18)}
+.wallet-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--blue-bright);box-shadow:0 0 8px var(--blue-bright)}
+.wallet-chip.disconnected{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--muted)}
+/* 布局 */
+.view{display:none;max-width:1180px;margin:0 auto;padding:40px 22px 80px}
+.view.active{display:block;animation:viewIn .35s ease}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.kicker{font-family:'Chakra Petch',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);margin-bottom:10px}
+.page-head h1{font-size:30px;font-weight:700;letter-spacing:1px}
+.page-head p{color:var(--muted);margin:8px 0;font-size:14.5px;max-width:680px}
+/* 步骤条 */
+.steps{display:flex;gap:0;margin:28px 0 30px}
+.step{flex:1;display:flex;align-items:center;gap:12px;position:relative}
+.step:not(:last-child)::after{content:"";flex:1;height:1px;background:var(--line);margin:0 10px}
+.step .num{width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-family:'Chakra Petch',monospace;font-size:14px;border:1px solid var(--line);color:var(--faint);background:var(--bg2);transition:.3s}
+.step .lb{font-size:13px;color:var(--faint);white-space:nowrap;transition:.3s}
+.step.on .num{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(228,188,78,.25)}
+.step.on .lb{color:var(--text)}
+.step.done .num{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#10141d;border-color:transparent}
+.step.done .lb{color:var(--gold)}
+/* 卡片 */
+.card{background:linear-gradient(160deg,rgba(20,28,48,.62),rgba(8,12,22,.82));
+  border:1px solid var(--line);border-radius:var(--r);padding:26px}
+.card h3{font-size:16px;font-weight:500;display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.card h3 .bar{width:3px;height:15px;border-radius:2px;background:linear-gradient(var(--gold),var(--gold-deep))}
+.grid{display:grid;gap:20px}
+.g-2{grid-template-columns:1.15fr .85fr}
+.g-2b{grid-template-columns:.9fr 1.1fr}
+/* 表单 */
+.field{margin-bottom:18px}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:7px}
+.field .hint{font-size:12px;color:var(--faint);margin-top:6px}
+.input{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:11px;
+  padding:13px 15px;color:var(--text);font-size:14px;outline:none;transition:.2s;font-family:'Chakra Petch',monospace}
+.input:focus{border-color:var(--line-blue);box-shadow:0 0 0 3px rgba(59,146,255,.12)}
+.input.err{border-color:rgba(255,90,90,.5)}
+.input::placeholder{color:#46506380}
+.input-wrap{position:relative}
+.input-wrap .suffix{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--faint);font-family:'Chakra Petch',monospace}
+/* 按钮 */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  padding:14px 22px;border-radius:12px;border:0;cursor:pointer;font-size:15px;font-weight:500;transition:.22s;
+  font-family:'Noto Sans SC',sans-serif}
+.btn-gold{background:linear-gradient(135deg,#F2CE6E,var(--gold) 45%,var(--gold-deep));color:#12161f;font-weight:700}
+.btn-gold:hover{filter:brightness(1.08);box-shadow:0 8px 26px rgba(228,188,78,.28)}
+.btn-blue{background:linear-gradient(135deg,#5BA2FF,var(--blue) 50%,var(--blue-deep));color:#fff;font-weight:700}
+.btn-blue:hover{filter:brightness(1.1);box-shadow:0 8px 26px rgba(59,146,255,.3)}
+.btn-ghost{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none;box-shadow:none}
+.btn-sm{width:auto;padding:8px 15px;font-size:13px;border-radius:9px}
+/* 信息行 */
+.rule-list{list-style:none;display:flex;flex-direction:column;gap:13px}
+.rule-list li{display:flex;gap:11px;font-size:13.5px;color:var(--muted);line-height:1.65}
+.rule-list li svg{flex:none;margin-top:3px}
+.rule-list li b{color:var(--text);font-weight:500}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)}.kv .v{color:var(--text);text-align:right;word-break:break-all}
+.gold-text{color:var(--gold)}.blue-text{color:var(--blue-bright)}
+/* 状态徽章 */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;padding:3px 10px;border-radius:20px;font-family:'Noto Sans SC',sans-serif}
+.badge-gold{background:var(--gold-soft);color:var(--gold);border:1px solid var(--line-gold)}
+.badge-blue{background:var(--blue-soft);color:var(--blue-bright);border:1px solid var(--line-blue)}
+.badge-gray{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line)}
+/* 预售倒计时 */
+.count-banner{display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+  background:linear-gradient(120deg,rgba(21,86,200,.22),rgba(228,188,78,.10));
+  border:1px solid var(--line-blue);border-radius:var(--r);padding:22px 28px;margin:26px 0;}
+.count-banner.live{border-color:var(--line-gold);background:linear-gradient(120deg,rgba(228,188,78,.18),rgba(21,86,200,.12))}
+.count-cells{display:flex;gap:10px;margin-left:auto}
+.count-cell{min-width:64px;text-align:center;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:12px;padding:10px 8px}
+.count-cell b{font-family:'Chakra Petch',monospace;font-size:24px;font-weight:600;display:block;color:var(--blue-bright)}
+.count-cell span{font-size:11px;color:var(--faint)}
+.count-banner.live .count-cell b{color:var(--gold)}
+.count-info .t{font-size:16px;font-weight:500}
+.count-info .s{font-size:12.5px;color:var(--muted);margin-top:3px}
+.demo-link{background:none;border:0;color:var(--faint);font-size:12px;text-decoration:underline;cursor:pointer;font-family:'Noto Sans SC',sans-serif;margin-top:6px}
+.demo-link:hover{color:var(--gold)}
+/* 收款地址 */
+.addr-main{display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:11px;padding:12px 15px;margin-bottom:14px}
+.addr-main .seq{font-family:'Chakra Petch',monospace;font-size:12px;color:var(--gold);border:1px solid var(--line-gold);border-radius:7px;padding:3px 8px;flex:none}
+.addr-main .ad{font-family:'Chakra Petch',monospace;font-size:13px;word-break:break-all}
+.icon-btn{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  color:var(--muted);cursor:pointer;display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{color:var(--gold);border-color:var(--line-gold)}
+.progress{height:8px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden;margin:8px 0 7px}
+.progress i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),var(--blue-bright));transition:width .5s;box-shadow:0 0 10px rgba(59,146,255,.5)}
+.pf-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--faint);font-family:'Chakra Petch',monospace}
+.seq-dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.seq-dot{width:22px;height:22px;border-radius:6px;font-size:9.5px;display:grid;place-items:center;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--faint);font-family:'Chakra Petch',monospace}
+.seq-dot.done{background:rgba(228,188,78,.12);border-color:var(--line-gold);color:var(--gold)}
+.seq-dot.cur{background:rgba(59,146,255,.16);border-color:var(--line-blue);color:var(--blue-bright);box-shadow:0 0 10px rgba(59,146,255,.3)}
+/* 套餐卡 */
+.pkgs{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0 26px}
+.pkg{position:relative;text-align:left;cursor:pointer;padding:20px 18px;border-radius:14px;
+  background:linear-gradient(165deg,rgba(20,28,48,.6),rgba(8,12,22,.85));
+  border:1px solid var(--line);transition:.22s;color:var(--text)}
+.pkg:hover{border-color:var(--line-blue);transform:translateY(-2px)}
+.pkg.sel{border-color:var(--blue-bright);box-shadow:0 0 0 1px var(--blue-bright),0 10px 30px rgba(59,146,255,.2)}
+.pkg .pn{font-size:12.5px;color:var(--muted)}
+.pkg .rate{font-family:'Chakra Petch',monospace;font-size:29px;font-weight:700;color:var(--blue-bright);margin:8px 0 2px}
+.pkg.sel .rate{color:var(--blue-bright)}
+.pkg .rate small{font-size:13px;color:var(--faint);font-weight:500}
+.pkg .split{font-size:11.5px;color:var(--faint);margin-bottom:12px}
+.split-bar{display:flex;height:7px;border-radius:5px;overflow:hidden;margin-bottom:10px}
+.split-bar i{display:block;height:100%}
+.split-bar .ins{background:linear-gradient(90deg,#caa244,var(--gold))}
+.split-bar .int{background:linear-gradient(90deg,var(--blue-deep),var(--blue-bright))}
+.pkg .sub{font-size:11px;color:var(--faint);line-height:1.55}
+.pkg .check{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;transition:.2s}
+.pkg.sel .check{background:var(--blue-bright);border-color:var(--blue-bright);color:#06121f}
+/* 收益测算 */
+.est-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:4px}
+.est-table th,.est-table td{padding:10px 8px;text-align:right;border-bottom:1px solid var(--line)}
+.est-table th:first-child,.est-table td:first-child{text-align:left}
+.est-table th{color:var(--faint);font-weight:400;font-size:12px}
+.est-table td{font-family:'Chakra Petch',monospace}
+.est-table tr:last-child td{border-bottom:0}
+.est-table thead td,.est-table .hl{color:var(--gold)}
+/* 订单 */
+.order{border:1px solid var(--line);border-radius:13px;padding:16px 18px;margin-bottom:12px;
+  background:linear-gradient(160deg,rgba(20,28,48,.5),rgba(8,12,22,.7))}
+.order-top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.order-top .amt{font-family:'Chakra Petch',monospace;font-size:18px;font-weight:600}
+.order-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;border-top:1px dashed var(--line);padding-top:12px}
+.order-grid .og .l{font-size:11px;color:var(--faint)}
+.order-grid .og .v{font-size:13.5px;font-family:'Chakra Petch',monospace;margin-top:2px}
+.empty{text-align:center;padding:44px 20px;color:var(--faint);font-size:13.5px;border:1px dashed var(--line);border-radius:13px}
+/* 成功面板 */
+.success{text-align:center;padding:36px 26px}
+.success .ring{width:72px;height:72px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;
+  background:var(--gold-soft);border:1px solid var(--line-gold);animation:pop .4s ease}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.success h3{justify-content:center;font-size:19px;margin-bottom:8px}
+.success p{color:var(--muted);font-size:13.5px;margin-bottom:20px}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+/* 关系链 */
+.chain{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:6px 0 20px}
+.chain-node{flex:1;min-width:150px;text-align:center;padding:16px 14px;border-radius:13px;border:1px solid var(--line);background:rgba(0,0,0,.3)}
+.chain-node.me{border-color:var(--line-gold);background:var(--gold-soft)}
+.chain-node .role{font-size:11.5px;color:var(--faint);margin-bottom:6px}
+.chain-node.me .role{color:var(--gold)}
+.chain-node .ad{font-family:'Chakra Petch',monospace;font-size:12px;word-break:break-all}
+.chain-arrow{color:var(--faint);flex:none}
+/* toast */
+.toast-wrap{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:10px;align-items:center}
+.toast{background:rgba(16,22,36,.95);border:1px solid var(--line-blue);border-radius:11px;padding:12px 20px;
+  font-size:13.5px;color:var(--text);box-shadow:0 12px 40px rgba(0,0,0,.5);animation:toastIn .3s ease;display:flex;align-items:center;gap:9px}
+.toast.err{border-color:rgba(255,90,90,.45)}
+.toast.ok{border-color:var(--line-gold)}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.sec-title{font-size:17px;font-weight:500;margin:34px 0 16px;display:flex;align-items:center;gap:10px}
+.sec-title .bar{width:3px;height:16px;border-radius:2px;background:linear-gradient(var(--blue),var(--blue-bright))}
+.note-box{font-size:12.5px;color:var(--faint);background:rgba(255,255,255,.03);border:1px dashed var(--line);border-radius:11px;padding:13px 16px;margin-top:16px;line-height:1.7}
+/* 响应式 */
+@media(max-width:900px){
+  .g-2,.g-2b{grid-template-columns:1fr}
+  .pkgs{grid-template-columns:repeat(2,1fr)}
+  .order-grid{grid-template-columns:repeat(2,1fr)}
+  .count-cells{margin-left:0}
+}
+@media(max-width:560px){
+  .nav-in{flex-wrap:wrap;gap:10px}
+  .nav-links{order:3;width:100%;margin-left:0}
+  .nav-tab{flex:1;padding:8px 6px;font-size:13px}
+  .page-head h1{font-size:23px}
+  .steps{flex-direction:column;gap:14px}
+  .step:not(:last-child)::after{display:none}
+  .pkgs{grid-template-columns:1fr}
+  .count-cell{min-width:56px}.count-cell b{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+<!-- ===== 顶部导航 ===== -->
+<nav class="nav">
+  <div class="nav-in">
+    <a class="brand" href="#/bind">
+      <img src="assets/logo.png" alt="AKN">
+      <div class="brand-txt">
+        <div class="wm"><span class="a">A</span><span class="k">K</span><span class="n">N</span></div>
+        <div class="tg">CODE · LIQUIDITY · CONSENSUS</div>
+      </div>
+    </a>
+    <div class="nav-links">
+      <button class="nav-tab" data-route="bind" onclick="go('#/bind')">绑定关系</button>
+      <button class="nav-tab" data-route="presale" onclick="go('#/presale')">参与预售</button>
+    </div>
+    <button class="wallet-chip disconnected" id="navWallet" onclick="onWalletClick()">连接钱包</button>
+  </div>
+</nav>
+
+<!-- ===== 视图：绑定关系 ===== -->
+<section class="view" id="view-bind">
+  <div class="page-head">
+    <div class="kicker">REFERRAL BINDING</div>
+    <h1>绑定推荐关系</h1>
+    <p>通过邀请链接注册并上链绑定推荐人，绑定后关系永久记录、不可更改。链上与 DApp 均可完成绑定。</p>
+  </div>
+
+  <div class="steps" id="bindSteps">
+    <div class="step" data-s="1"><div class="num">1</div><div class="lb">连接钱包</div></div>
+    <div class="step" data-s="2"><div class="num">2</div><div class="lb">确认推荐人地址</div></div>
+    <div class="step" data-s="3"><div class="num">3</div><div class="lb">支付 BNB 上链绑定</div></div>
+  </div>
+
+  <div class="grid g-2">
+    <!-- 左：绑定操作 -->
+    <div id="bindLeft"></div>
+    <!-- 右：绑定说明 -->
+    <div class="card">
+      <h3><span class="bar"></span>绑定说明</h3>
+      <ul class="rule-list">
+        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+          <span><b>通过邀请链接注册</b>，需支付少量 BNB 作为上链 Gas，链上和 DApp 均可绑定关系。</span></li>
+        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B92FF" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span>绑定关系<b>仅限一次、不可更改</b>，请仔细核对推荐人地址后再签名上链。</span></li>
+        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B92FF" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
+          <span><b>有效推荐</b>：推荐人必须是正在产生收益的会员，已出局或未投资的地址不算有效推荐，空号向上紧缩。</span></li>
+        <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>绑定成功后，可获得<b>专属邀请链接</b>，直推 1 人即享 1 代静态收益 2%，最高 15 代。</span></li>
+      </ul>
+      <div class="note-box">
+        本页面为 DApp 前端原型演示：钱包连接、地址签名、链上交易均为模拟，正式版本将调用 BSC 链上绑定合约完成。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 视图：参与预售 ===== -->
+<section class="view" id="view-presale">
+  <div class="page-head">
+    <div class="kicker">AKN PRESALE</div>
+    <h1>参与 AKN 预售</h1>
+    <p>预售定于 10 月 2 日下午开启，单笔 100 ~ 10,000 USDT，可投多笔（每笔不低于上笔）。预售期间每 24 小时统一产生 1% LP 静态收益，11 月正式上线后恢复套餐收益并开放领取。</p>
+  </div>
+
+  <div class="count-banner" id="countBanner">
+    <div class="count-info">
+      <div class="t" id="countTitle">距预售开始</div>
+      <div class="s" id="countSub">2026 年 10 月 2 日 14:00（太平洋时间）</div>
+      <button class="demo-link" id="demoLink" onclick="toggleDemo()">演示模式：模拟预售已开始</button>
+    </div>
+    <div class="count-cells" id="countCells"></div>
+  </div>
+
+  <div class="grid">
+    <!-- 上：下单 -->
+    <div class="card">
+      <h3><span class="bar"></span>选择套餐并参与</h3>
+      <div class="pkgs" id="pkgList"></div>
+      <div class="field">
+        <label>投资金额（USDT）</label>
+        <div class="input-wrap">
+          <input class="input" id="amountInput" type="number" min="100" max="10000" step="1" placeholder="输入 100 ~ 10,000 的整数金额" oninput="onAmountInput()">
+          <span class="suffix">USDT</span>
+        </div>
+        <div class="hint" id="amountHint">金额须为 1 的整数倍；可投多笔，每笔金额须大于等于上一笔。</div>
+      </div>
+      <button class="btn btn-blue" id="investBtn" onclick="invest()">确认参与预售</button>
+      <div class="note-box" id="investNote"></div>
+    </div>
+
+    <!-- 下：收款地址轮序 -->
+    <div class="card">
+      <h3><span class="bar"></span>预售收款合约（30 地址轮序）</h3>
+      <div class="addr-main">
+        <span class="seq" id="curSeq">#01</span>
+        <span class="ad" id="curAddr"></span>
+        <button class="icon-btn" onclick="copyCurAddr()" title="复制地址">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="progress"><i id="curProg" style="width:0%"></i></div>
+      <div class="pf-meta"><span id="curRaised">0 USDT</span><span>满 100,000 USDT 自动切换</span></div>
+      <div class="seq-dots" id="seqDots"></div>
+      <div class="note-box">30 个收款合约钱包地址按 1 ~ 30 号顺序排队，单个钱包收款每达到 10 万 USDT 以上，系统自动替换进入下一个地址。</div>
+    </div>
+  </div>
+
+  <div class="sec-title"><span class="bar"></span>收益测算（预售期统一 1% / 24 小时，以 LP 结算）</div>
+  <div class="card">
+    <table class="est-table">
+      <thead><tr><th>持有时间</th><th>1 天</th><th>7 天</th><th>15 天</th><th>30 天</th></tr></thead>
+      <tbody><tr>
+        <td class="hl">累计静态 LP 收益</td>
+        <td id="est1">—</td><td id="est7">—</td><td id="est15">—</td><td id="est30">—</td>
+      </tr></tbody>
+    </table>
+    <div class="note-box" id="rateNote"></div>
+  </div>
+
+  <div class="sec-title"><span class="bar"></span>我的预售订单</div>
+  <div id="orderList"></div>
+</section>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+/* ============ 全局状态 ============ */
+const state = {
+  wallet:null, bound:false, inviter:'', bindTx:'', bindTs:0,
+  pkg:0, amount:null, orders:[], demo:false,
+  payIdx:6, payRaised:63420, payers:[]
+};
+const PKGS=[
+  {n:'套餐一',ins:80,int:20,rate:1.0},
+  {n:'套餐二',ins:70,int:30,rate:1.5},
+  {n:'套餐三',ins:60,int:40,rate:2.0},
+  {n:'套餐四',ins:50,int:50,rate:2.5}
+];
+const START=new Date('2026-10-02T14:00:00-07:00').getTime();
+
+/* ============ 工具 ============ */
+function $(s){return document.querySelector(s)}
+function $all(s){return Array.from(document.querySelectorAll(s))}
+function shortAddr(a){return a?a.slice(0,6)+'…'+a.slice(-4):''}
+function fmt(n){return Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmt0(n){return Math.floor(n).toLocaleString('en-US')}
+function rndHex(len){let h='';for(let i=0;i<len;i++)h+='0123456789abcdef'[Math.floor(Math.random()*16)];return h}
+function genAddr(){return '0x'+rndHex(40)}
+function genTx(){return '0x'+rndHex(64)}
+function toast(msg,type){
+  const t=document.createElement('div');
+  t.className='toast '+(type||'');
+  t.innerHTML=(type==='ok'?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>'
+    :type==='err'?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff7a7a" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>'
+    :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6FC0FF" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>')
+    +'<span>'+msg+'</span>';
+  $('#toastWrap').appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .3s';t.style.opacity='0';setTimeout(()=>t.remove(),300)},2600);
+}
+function copyText(text,okMsg){
+  const done=()=>toast(okMsg||'已复制','ok');
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(()=>fallback());}
+  else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done()}catch(e){toast('复制失败，请手动复制','err')}ta.remove();}
+}
+/* 生成 30 个确定性收款地址 */
+(function(){
+  const chars='0123456789abcdef';
+  function h32(x){
+    x=(x^(x>>>16))>>>0; x=Math.imul(x,0x85ebca6b)>>>0;
+    x=(x^(x>>>13))>>>0; x=Math.imul(x,0xc2b2ae35)>>>0;
+    return (x^(x>>>16))>>>0;
+  }
+  for(let i=0;i<30;i++){
+    let h='0x';
+    for(let j=0;j<40;j++)
+      h+=chars[h32(0x9e3779b9+i*40+j)&0xf];
+    state.payers.push(h);
+  }
+})();
+
+/* ============ 路由 ============ */
+function go(h){location.hash=h}
+function route(){
+  const r=(location.hash||'#/bind').split('?')[0];
+  const cur=r==='#/presale'?'presale':'bind';
+  $all('.view').forEach(v=>v.classList.remove('active'));
+  $('#view-'+cur).classList.add('active');
+  $all('.nav-tab').forEach(t=>t.classList.toggle('active',t.dataset.route===cur));
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+
+/* ============ 钱包（模拟） ============ */
+function connectWallet(){
+  const addr=genAddr();
+  state.wallet={addr,bnb:(0.18+Math.random()*0.7).toFixed(4)};
+  renderWallet();
+  toast('钱包已连接：'+shortAddr(addr),'ok');
+  renderBind();
+}
+function onWalletClick(){
+  if(!state.wallet)connectWallet();
+  else toast('已连接 '+shortAddr(state.wallet.addr)+'，余额 '+state.wallet.bnb+' BNB');
+}
+function renderWallet(){
+  const el=$('#navWallet');
+  if(state.wallet){el.classList.remove('disconnected');
+    el.innerHTML='<span class="dot"></span>'+shortAddr(state.wallet.addr);}
+  else{el.classList.add('disconnected');el.textContent='连接钱包';}
+}
+
+/* ============ 视图一：绑定关系 ============ */
+function getRefParam(){
+  let ref=new URLSearchParams(location.search).get('ref');
+  if(!ref&&location.hash.includes('?'))
+    ref=new URLSearchParams(location.hash.split('?')[1]).get('ref');
+  return ref||'';
+}
+function setBindStep(n){
+  $all('#bindSteps .step').forEach(s=>{
+    const v=+s.dataset.s;
+    s.classList.toggle('done',v<n);s.classList.toggle('on',v===n);
+  });
+}
+function renderBind(){
+  const left=$('#bindLeft');
+  if(!state.wallet){
+    setBindStep(1);
+    left.innerHTML='<div class="card"><h3><span class="bar"></span>第一步：连接钱包</h3>'
+      +'<p style="color:var(--muted);font-size:13.5px;margin-bottom:18px">连接你在 BSC 链上的钱包地址（MetaMask / TokenPocket 等），该地址将作为你的会员账户与收款地址。</p>'
+      +'<button class="btn btn-blue" onclick="connectWallet()">连接钱包</button></div>';
+    return;
+  }
+  if(!state.bound){
+    setBindStep(2);
+    const ref=state.inviter||getRefParam();
+    left.innerHTML='<div class="card"><h3><span class="bar"></span>确认推荐人并上链绑定</h3>'
+      +'<div class="kv"><span class="k">我的钱包地址</span><span class="v mono">'+shortAddr(state.wallet.addr)+'</span></div>'
+      +'<div class="kv"><span class="k">BNB 余额（Gas）</span><span class="v mono">'+state.wallet.bnb+' BNB</span></div>'
+      +'<div class="field" style="margin-top:16px"><label>推荐人钱包地址</label>'
+      +'<input class="input" id="inviterInput" placeholder="0x…（从邀请链接自动带入）" value="'+ref+'" oninput="state.inviter=this.value">'
+      +'<div class="hint">绑定后不可更改，请务必与邀请你的推荐人核对。</div></div>'
+      +'<div class="kv"><span class="k">预计 Gas 费用</span><span class="v mono">≈ 0.0006 BNB</span></div>'
+      +'<button class="btn btn-blue" style="margin-top:16px" onclick="doBind()">确认绑定并上链</button></div>';
+    return;
+  }
+  setBindStep(4);
+  const myLink=location.origin+location.pathname+'?ref='+state.wallet.addr;
+  left.innerHTML=
+    '<div class="card" style="margin-bottom:20px"><div class="success" style="padding:6px 0 0">'
+    +'<div class="ring"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg></div>'
+    +'<h3>推荐关系已上链绑定</h3><p>绑定关系已永久记录在 BSC 链上，不可更改。</p></div>'
+    +'<div class="chain">'
+    +'<div class="chain-node"><div class="role">我的推荐人</div><div class="ad">'+shortAddr(state.inviter)+'</div></div>'
+    +'<div class="chain-arrow"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>'
+    +'<div class="chain-node me"><div class="role">我的地址</div><div class="ad">'+shortAddr(state.wallet.addr)+'</div></div>'
+    +'</div>'
+    +'<div class="kv"><span class="k">绑定交易哈希</span><span class="v mono">'+shortAddr(state.bindTx)+'</span></div>'
+    +'<div class="kv"><span class="k">绑定时间</span><span class="v">'+new Date(state.bindTs).toLocaleString('zh-CN')+'</span></div></div>'
+    +'<div class="card"><h3><span class="bar"></span>我的专属邀请链接</h3>'
+    +'<div class="addr-main"><span class="ad" style="font-size:12px">'+myLink+'</span>'
+    +'<button class="icon-btn" onclick="copyText(\''+myLink+'\',\'邀请链接已复制\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>'
+    +'<button class="btn btn-ghost btn-sm" style="width:100%" onclick="go(\'#/presale\')">前往参与预售</button></div>';
+}
+function doBind(){
+  const v=$('#inviterInput');
+  const val=(v.value||'').trim();
+  if(!/^0x[0-9a-fA-F]{40}$/.test(val)){v.classList.add('err');toast('请输入正确的推荐人钱包地址（0x + 40 位）','err');return;}
+  v.classList.remove('err');
+  if(val.toLowerCase()===state.wallet.addr.toLowerCase()){v.classList.add('err');toast('不能绑定自己的地址为推荐人','err');return;}
+  state.inviter=val;
+  setBindStep(3);
+  $('#bindLeft').innerHTML='<div class="card"><div class="success" style="padding:30px 0">'
+    +'<div class="spin" style="width:42px;height:42px;border-width:3px;margin:0 auto 18px"></div>'
+    +'<h3 style="justify-content:center">正在链上确认绑定…</h3>'
+    +'<p>请在钱包中确认签名，并支付 Gas 费用，请勿关闭页面。</p></div></div>';
+  setTimeout(()=>{
+    state.bound=true;state.bindTx=genTx();state.bindTs=Date.now();
+    renderBind();toast('推荐关系绑定成功','ok');
+  },2200);
+}
+
+/* ============ 视图二：参与预售 ============ */
+function isLive(){return state.demo||Date.now()>=START}
+function toggleDemo(){
+  state.demo=!state.demo;renderCountdown();
+  toast(state.demo?'已进入演示模式（模拟预售已开始）':'已退出演示模式');
+}
+function countCell(v,l){return '<div class="count-cell"><b>'+v+'</b><span>'+l+'</span></div>'}
+function renderCountdown(){
+  const live=isLive();
+  $('#countBanner').classList.toggle('live',live);
+  $('#countTitle').textContent=live?'预售进行中':'距预售开始';
+  $('#demoLink').textContent=state.demo?'退出演示模式':'演示模式：模拟预售已开始';
+  const cells=$('#countCells');
+  if(live){
+    cells.innerHTML='<div class="count-cell" style="min-width:130px"><b style="font-size:17px">PRESALE LIVE</b><span>正在进行中</span></div>';
+  }else{
+    let d=START-Date.now();if(d<0)d=0;
+    const dd=Math.floor(d/864e5),hh=Math.floor(d/36e5)%24,mm=Math.floor(d/6e4)%60,ss=Math.floor(d/1e3)%60;
+    cells.innerHTML=countCell(String(dd).padStart(2,'0'),'天')+countCell(String(hh).padStart(2,'0'),'时')
+      +countCell(String(mm).padStart(2,'0'),'分')+countCell(String(ss).padStart(2,'0'),'秒');
+  }
+}
+/* 收款地址轮序 */
+function renderPayers(){
+  $('#curSeq').textContent='#'+String(state.payIdx+1).padStart(2,'0');
+  $('#curAddr').textContent=state.payers[state.payIdx];
+  $('#curProg').style.width=Math.min(100,state.payRaised/100000*100)+'%';
+  $('#curRaised').textContent=fmt0(state.payRaised)+' / 100,000 USDT';
+  $('#seqDots').innerHTML=state.payers.map((_,i)=>{
+    const c=i<state.payIdx?'done':i===state.payIdx?'cur':'';
+    return '<span class="seq-dot '+c+'">'+(i+1)+'</span>';
+  }).join('');
+}
+function copyCurAddr(){copyText(state.payers[state.payIdx],'收款地址已复制')}
+/* 套餐 */
+function renderPkgs(){
+  $('#pkgList').innerHTML=PKGS.map((p,i)=>
+    '<button type="button" class="pkg '+(state.pkg===i?'sel':'')+'" onclick="selectPkg('+i+')">'
+    +'<span class="check"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span>'
+    +'<div class="pn">'+p.n+'（保险池 '+p.ins+'% / 交互 '+p.int+'%）</div>'
+    +'<div class="rate">'+p.rate.toFixed(1).replace(/\.0$/,'')+'<small> %/日</small></div>'
+    +'<div class="split">正式上线后日静态收益</div>'
+    +'<div class="split-bar"><i class="ins" style="width:'+p.ins+'%"></i><i class="int" style="width:'+p.int+'%"></i></div>'
+    +'<div class="sub">交互合约部分：80% 组 LP 转黑洞，20% 至运营地址</div>'
+    +'</button>').join('');
+}
+function selectPkg(i){state.pkg=i;renderPkgs()}
+/* 金额与测算 */
+function onAmountInput(){
+  const el=$('#amountInput'),v=el.value;
+  state.amount=v===''?null:Number(v);
+  let ok=true,msg='';
+  const last=state.orders.length?state.orders[state.orders.length-1].amount:0;
+  if(v!==''){
+    if(!/^\d+$/.test(v)){ok=false;msg='金额须为 1 的整数倍（不含小数）';}
+    else if(+v<100||+v>10000){ok=false;msg='单笔金额须在 100 ~ 10,000 USDT 之间';}
+    else if(last&&+v<last){ok=false;msg='复投金额须 ≥ 上笔 '+last+' USDT';}
+  }
+  el.classList.toggle('err',v!==''&&!ok);
+  $('#amountHint').innerHTML=(v!==''&&!ok)?'<span style="color:#ff8a8a">'+msg+'</span>'
+    :'金额须为 1 的整数倍；可投多笔，每笔金额须大于等于上一笔。';
+  const a=state.amount||0;
+  const set=(id,d)=>$('#'+id).textContent=a?fmt(a*0.01*d)+' LP':'—';
+  set('est1',1);set('est7',7);set('est15',15);set('est30',30);
+}
+/* 下单 */
+function invest(){
+  if(!state.wallet){toast('请先连接钱包','err');return;}
+  if(!state.bound){toast('请先完成推荐关系绑定','err');go('#/bind');return;}
+  if(!isLive()){toast('预售尚未开始，10 月 2 日 14:00 开启','err');return;}
+  const el=$('#amountInput'),v=el.value;
+  const last=state.orders.length?state.orders[state.orders.length-1].amount:0;
+  if(!/^\d+$/.test(v)||+v<100||+v>10000||(last&&+v<last)){onAmountInput();toast('请检查投资金额','err');return;}
+  const btn=$('#investBtn');btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span>链上确认中…';
+  setTimeout(()=>{
+    const order={ts:Date.now(),pkg:state.pkg,amount:+v,payer:state.payers[state.payIdx],tx:genTx()};
+    state.orders.push(order);
+    state.payRaised+=+v;
+    while(state.payRaised>=100000&&state.payIdx<29){state.payRaised-=100000;state.payIdx++;}
+    btn.disabled=false;btn.textContent='确认参与预售';
+    el.value='';state.amount=null;onAmountInput();
+    renderPayers();renderOrders();
+    toast('预售参与成功，'+fmt(+v)+' USDT 已上链','ok');
+  },1800);
+}
+/* 订单列表 */
+function renderOrders(){
+  const wrap=$('#orderList');
+  if(!state.orders.length){wrap.innerHTML='<div class="empty">暂无预售订单，连接钱包并完成绑定后即可参与。</div>';return;}
+  wrap.innerHTML=state.orders.map(o=>{
+    const p=PKGS[o.pkg];
+    const elapsed=Date.now()-o.ts;
+    const days=Math.floor(elapsed/864e5);
+    let next=864e5-(elapsed%864e5);
+    const nh=Math.floor(next/36e5),nm=Math.floor(next/6e4)%60;
+    const acc=o.amount*0.01*days;
+    return '<div class="order"><div class="order-top">'
+      +'<span class="amt">'+fmt0(o.amount)+' USDT</span>'
+      +'<span class="badge badge-gold">'+p.n+'</span>'
+      +'<span class="badge badge-blue">预售期 1% / 日</span>'
+      +'<span class="badge badge-gray">11 月上线后可领取 LP</span></div>'
+      +'<div class="order-grid">'
+      +'<div class="og"><div class="l">累计静态 LP</div><div class="v gold-text">'+fmt(acc)+'</div></div>'
+      +'<div class="og"><div class="l">距下次结算</div><div class="v">'+nh+' 时 '+nm+' 分</div></div>'
+      +'<div class="og"><div class="l">收款地址</div><div class="v">'+shortAddr(o.payer)+'</div></div>'
+      +'<div class="og"><div class="l">下单时间</div><div class="v" style="font-size:12px">'
+      +new Date(o.ts).toLocaleString('zh-CN',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})+'</div></div>'
+      +'</div></div>';
+  }).join('');
+}
+/* 初始化预售视图 */
+$('#investNote').innerHTML='资金分配：保险池部分进入保险池地址（开源丢权限，可随时在 DApp / 链上赎回，赎回后该笔订单结束、业绩消失）；交互合约部分 80% 中一半买币与剩余油组 LP 转黑洞，20% 至运营地址 USDT。';
+$('#rateNote').innerHTML='预售期间（10/2 起至 11 月正式上线）不分套餐，每 24 小时统一按 <span class="gold-text">1%</span> 结算 LP，暂不可领取；正式上线后恢复套餐日静态收益（套餐一 1%、套餐二 1.5%、套餐三 2%、套餐四 2.5%）并开放 LP 领取，领取静态时同步向上结算代数奖、团队奖与小区分红。';
+renderCountdown();renderPayers();renderPkgs();onAmountInput();renderOrders();
+setInterval(()=>{renderCountdown();if(state.orders.length)renderOrders();},1000);
+
+/* placeholder:presale */
+route();renderWallet();renderBind();
+</script>
+</body>
+</html>

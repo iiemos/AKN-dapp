@@ -1,0 +1,1418 @@
+:root {
+      --bg: #040C08;
+      --bg2: #07140E;
+      --gold: #E4BC4E;
+      --gold-deep: #B8902C;
+      --gold-soft: rgba(228, 188, 78, .13);
+      --brand: #12C45C;
+      --brand-bright: #5EE89A;
+      --brand-deep: #0B7A42;
+      --brand-soft: rgba(18, 196, 92, .12);
+      --text: #E8F6EE;
+      --muted: #8AA89A;
+      --faint: #5E7368;
+      --line: rgba(255, 255, 255, .09);
+      --line-gold: rgba(228, 188, 78, .35);
+      --line-brand: rgba(18, 196, 92, .35);
+      --green: #35D98A;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    html,
+    body {
+      background: #020806
+    }
+
+    body {
+      font-family: 'Noto Sans SC', 'Chakra Petch', -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    .mono {
+      font-family: 'Chakra Petch', ui-monospace, monospace
+    }
+
+    /* ===== App 容器（H5 手机宽） ===== */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      background:
+        radial-gradient(500px 320px at 10% -6%, rgba(18, 196, 92, .13), transparent 60%),
+        radial-gradient(520px 340px at 95% -4%, rgba(228, 188, 78, .07), transparent 58%),
+        var(--bg);
+      box-shadow: 0 0 70px rgba(0, 0, 0, .65);
+      overflow: hidden
+    }
+
+    .view {
+      display: none;
+      padding: 0 16px 110px
+    }
+
+    .view.active {
+      display: block;
+      animation: viewIn .3s ease
+    }
+
+    @keyframes viewIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* ===== 顶部品牌头 ===== */
+    .app-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 14px 16px 10px
+    }
+
+    .app-head img.hlogo {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%
+    }
+
+    .wm {
+      font-family: 'Chakra Petch', monospace;
+      font-weight: 700;
+      font-size: 23px;
+      letter-spacing: 2px;
+      line-height: 1
+    }
+
+    .wm .a {
+      color: var(--gold)
+    }
+
+    .wm .k {
+      color: #fff
+    }
+
+    .wm .n {
+      color: var(--brand-bright)
+    }
+
+    .wm-tg {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 7.5px;
+      letter-spacing: 2.2px;
+      color: var(--faint);
+      margin-top: 3px
+    }
+
+    .wallet-pill {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      max-width: 190px;
+      padding: 9px 13px;
+      border-radius: 22px;
+      background: rgba(18, 196, 92, .1);
+      border: 1px solid var(--line-brand);
+      color: var(--brand-bright);
+      font-family: 'Chakra Petch', monospace;
+      font-size: 12.5px;
+      cursor: pointer;
+      white-space: nowrap
+    }
+
+    .wallet-pill .chev {
+      flex: none;
+      opacity: .8
+    }
+
+    .wallet-pill.off {
+      background: rgba(255, 255, 255, .04);
+      border-color: var(--line);
+      color: var(--muted)
+    }
+
+    .wallet-pill:not(.off) {
+      background: rgba(18, 196, 92, .18);
+      border-color: var(--brand-bright);
+      box-shadow: 0 0 0 1px rgba(94, 232, 154, .22), 0 0 16px rgba(18, 196, 92, .38)
+    }
+
+    /* ===== 通用卡片 ===== */
+    .card {
+      background: linear-gradient(160deg, rgba(12, 36, 26, .6), rgba(6, 16, 12, .82));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px
+    }
+
+    .card h3 {
+      font-size: 15.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .card h3 .bar {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: linear-gradient(var(--gold), var(--gold-deep))
+    }
+
+    .card h3 .right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 400;
+      background: none;
+      border: 0;
+      cursor: pointer
+    }
+
+    .sec-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 18px 0 11px;
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .sec-title .bar {
+      width: 3px;
+      height: 15px;
+      border-radius: 2px;
+      background: linear-gradient(var(--brand), var(--brand-bright))
+    }
+
+    .note-box {
+      font-size: 12px;
+      color: var(--faint);
+      background: rgba(255, 255, 255, .03);
+      border: 1px dashed var(--line);
+      border-radius: 11px;
+      padding: 11px 13px;
+      margin-top: 12px;
+      margin-bottom: 10px;
+      line-height: 1.7
+    }
+
+    /* ===== 状态条 ===== */
+    .stat-strip {
+      display: flex;
+      align-items: center;
+      border-radius: 16px;
+      padding: 14px 6px;
+      margin-bottom: 14px;
+      background: linear-gradient(160deg, rgba(12, 36, 26, .6), rgba(6, 16, 12, .82));
+      border: 1px solid var(--line)
+    }
+
+    .stat-strip .ss {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 0
+    }
+
+    .stat-strip .ss+.ss {
+      border-left: 1px solid var(--line)
+    }
+
+    .stat-strip .ss .l1 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text)
+    }
+
+    .stat-strip .ss .l2 {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    .stat-strip .ss .v {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--brand-bright)
+    }
+
+    .gdot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 9px var(--green)
+    }
+
+    /* ===== 我的资产卡 ===== */
+    .asset-card {
+      position: relative;
+      overflow: hidden
+    }
+
+    .ring-deco {
+      position: absolute;
+      right: -20px;
+      top: -40px;
+      width: 330px;
+      pointer-events: none
+    }
+
+    .asset-info {
+      position: relative;
+      z-index: 2;
+      width: 64%
+    }
+
+    .eye {
+      background: none;
+      border: 0;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      vertical-align: middle;
+      margin-left: 4px
+    }
+
+    .big-num {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      margin: 6px 0 2px
+    }
+
+    .usd-line {
+      font-size: 12.5px;
+      color: var(--muted)
+    }
+
+    .up {
+      color: var(--green)
+    }
+
+    .slogan {
+      position: absolute;
+      right: 18px;
+      top: 26px;
+      width: 138px;
+      text-align: right;
+      z-index: 2
+    }
+
+    .slogan .zh {
+      font-size: 14px;
+      color: #E6F4EC;
+      letter-spacing: 2px;
+      line-height: 1.45;
+      text-shadow: 0 1px 10px rgba(4, 12, 8, .95)
+    }
+
+    .slogan .ln {
+      width: 22px;
+      height: 2px;
+      background: var(--gold);
+      margin: 6px 0 6px auto;
+      border-radius: 1px
+    }
+
+    .slogan .en {
+      font-size: 9px;
+      color: #96B0A2;
+      line-height: 1.5;
+      font-family: 'Chakra Petch', monospace;
+      text-shadow: 0 1px 8px rgba(4, 12, 8, .95)
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 11px;
+      margin-top: 20px;
+      position: relative;
+      z-index: 2
+    }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 12px;
+      border: 0;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: .2s
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #F2CE6E, var(--gold) 45%, var(--gold-deep));
+      color: #14181f
+    }
+
+    .btn-gold:active {
+      filter: brightness(1.06)
+    }
+
+    .btn-blue {
+      background: linear-gradient(135deg, #4ADE80, var(--brand) 50%, var(--brand-deep));
+      color: #fff
+    }
+
+    .btn-blue:active {
+      filter: brightness(1.1)
+    }
+
+    .btn-dark {
+      background: linear-gradient(135deg, rgba(18, 78, 48, .92), rgba(8, 40, 26, .95));
+      border: 1px solid var(--line-brand);
+      color: #E7F8EE
+    }
+
+    .btn-dark:active {
+      filter: brightness(1.15)
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--line);
+      color: var(--text)
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .btn-sm {
+      width: auto;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      border-radius: 9px
+    }
+
+    /* ===== 周期 / 套餐选择 ===== */
+    .sub-hd {
+      font-size: 12px;
+      color: var(--faint);
+      margin: -6px 0 13px
+    }
+
+    .periods {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px
+    }
+
+    .period {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 2px;
+      text-align: center;
+      background: rgba(0, 0, 0, .25);
+      color: var(--text);
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .period .pv {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      display: block;
+      line-height: 1.2
+    }
+
+    .period .pl {
+      font-size: 10.5px;
+      color: var(--faint);
+      display: block;
+      margin-top: 3px
+    }
+
+    .period.on {
+      background: linear-gradient(135deg, #4ADE80, var(--brand) 50%, var(--brand-deep));
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(18, 196, 92, .32)
+    }
+
+    .period.on .pv {
+      color: #fff
+    }
+
+    .period.on .pl {
+      color: rgba(255, 255, 255, .85)
+    }
+
+    /* ===== 首页投资周期：连体分段选择 ===== */
+    .seg {
+      display: flex;
+      border: 1px solid var(--line-brand);
+      border-radius: 13px;
+      padding: 4px;
+      background: rgba(18, 196, 92, .08)
+    }
+
+    .seg-item {
+      flex: 1;
+      background: none;
+      border: 0;
+      padding: 11px 2px;
+      text-align: center;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      min-width: 0
+    }
+
+    .seg-item+.seg-item {
+      border-left: 1px solid rgba(18, 196, 92, .22)
+    }
+
+    .seg-item .sv {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 19px;
+      font-weight: 700;
+      display: block;
+      line-height: 1.2;
+      color: var(--text)
+    }
+
+    .seg-item .sl {
+      font-size: 10.5px;
+      color: var(--faint);
+      display: block;
+      margin-top: 3px
+    }
+
+    .seg-item.on {
+      border-radius: 10px;
+      background: linear-gradient(135deg, #F2CE6E, var(--gold) 50%, var(--gold-deep))
+    }
+
+    .seg-item.on .sv {
+      color: #14181f
+    }
+
+    .seg-item.on .sl {
+      color: rgba(20, 24, 31, .72)
+    }
+
+    .seg-item.on+.seg-item {
+      border-left-color: transparent
+    }
+
+    /* ===== 环形图面板 ===== */
+    .donut-panel {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 15px;
+      margin-top: 13px;
+      background: rgba(0, 0, 0, .22)
+    }
+
+    .donut {
+      width: 108px;
+      height: 108px;
+      flex: none;
+      position: relative
+    }
+
+    .donut svg {
+      transform: rotate(-90deg)
+    }
+
+    .donut .dc {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: 'Chakra Petch', monospace;
+      font-size: 19px;
+      font-weight: 700
+    }
+
+    .donut-meta {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .dm .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle
+    }
+
+    .dm .t {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .dm .p {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 21px;
+      font-weight: 700;
+      margin: 2px 0
+    }
+
+    .dm .a {
+      font-size: 11px;
+      color: var(--faint)
+    }
+
+    .guarantee {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      background: rgba(18, 196, 92, .06);
+      color: var(--muted);
+      font-size: 12.5px;
+      cursor: pointer;
+      width: 100%
+    }
+
+    .guarantee .chev {
+      margin-left: auto;
+      color: var(--faint)
+    }
+
+    /* ===== 倒计时横幅 ===== */
+    .count-banner {
+      border-radius: 16px;
+      padding: 16px;
+      margin: 16px 0 14px;
+      background: linear-gradient(120deg, rgba(11, 122, 66, .2), rgba(228, 188, 78, .08));
+      border: 1px solid var(--line-brand)
+    }
+
+    .count-banner.live {
+      border-color: var(--line-gold);
+      background: linear-gradient(120deg, rgba(228, 188, 78, .16), rgba(11, 122, 66, .1))
+    }
+
+    .count-banner .ct {
+      font-size: 15px;
+      font-weight: 500
+    }
+
+    .count-banner .cs {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+
+    .count-cells {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-top: 12px
+    }
+
+    .count-cell {
+      text-align: center;
+      background: rgba(0, 0, 0, .32);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 8px 2px
+    }
+
+    .count-cell b {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 19px;
+      font-weight: 600;
+      display: block;
+      color: var(--brand-bright)
+    }
+
+    .count-cell span {
+      font-size: 10px;
+      color: var(--faint)
+    }
+
+    .count-banner.live .count-cell b {
+      color: var(--gold)
+    }
+
+    .live-pill {
+      grid-column: 1/-1;
+      text-align: center;
+      background: rgba(0, 0, 0, .3);
+      border: 1px solid var(--line-gold);
+      border-radius: 11px;
+      padding: 10px;
+      margin-top: 12px;
+      font-family: 'Chakra Petch', monospace;
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 1px
+    }
+
+    /* ===== 收款地址 ===== */
+    .addr-main {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 11px 12px;
+      margin-bottom: 12px
+    }
+
+    .addr-main .seq {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      border: 1px solid var(--line-gold);
+      border-radius: 7px;
+      padding: 3px 7px;
+      flex: none
+    }
+
+    .addr-main .ad {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11.5px;
+      word-break: break-all;
+      flex: 1
+    }
+
+    .icon-btn {
+      flex: none;
+      width: 31px;
+      height: 31px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .04);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center
+    }
+
+    .icon-btn:active {
+      color: var(--gold);
+      border-color: var(--line-gold)
+    }
+
+    .progress {
+      height: 7px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, .07);
+      overflow: hidden;
+      margin: 6px 0
+    }
+
+    .progress i {
+      display: block;
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-bright));
+      transition: width .5s
+    }
+
+    .pf-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--faint);
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .seq-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 13px
+    }
+
+    .seq-dot {
+      width: 21px;
+      height: 21px;
+      border-radius: 6px;
+      font-size: 9px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--line);
+      color: var(--faint);
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .seq-dot.done {
+      background: rgba(228, 188, 78, .12);
+      border-color: var(--line-gold);
+      color: var(--gold)
+    }
+
+    .seq-dot.cur {
+      background: rgba(18, 196, 92, .16);
+      border-color: var(--line-brand);
+      color: var(--brand-bright)
+    }
+
+    /* ===== 表单 ===== */
+    .field {
+      margin-bottom: 14px
+    }
+
+    .field label {
+      display: block;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 6px
+    }
+
+    .input {
+      width: 100%;
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .input:focus {
+      border-color: var(--line-brand);
+      box-shadow: 0 0 0 3px rgba(18, 196, 92, .1)
+    }
+
+    .input.err {
+      border-color: rgba(255, 90, 90, .5)
+    }
+
+    .input::placeholder {
+      color: rgba(70, 92, 82, .5)
+    }
+
+    .input-wrap {
+      position: relative
+    }
+
+    .input-wrap .suffix {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--faint);
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .field .hint {
+      font-size: 11.5px;
+      color: var(--faint);
+      margin-top: 6px
+    }
+
+    /* ===== 测算表 ===== */
+    .est-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px
+    }
+
+    .est-table th,
+    .est-table td {
+      padding: 9px 4px;
+      text-align: right;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .est-table th:first-child,
+    .est-table td:first-child {
+      text-align: left
+    }
+
+    .est-table th {
+      color: var(--faint);
+      font-weight: 400;
+      font-size: 11px
+    }
+
+    .est-table td {
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .est-table tr:last-child td {
+      border-bottom: 0
+    }
+
+    .est-table .hl {
+      color: var(--gold)
+    }
+
+    /* ===== 订单 ===== */
+    .order {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 14px 15px;
+      margin-bottom: 11px;
+      background: linear-gradient(160deg, rgba(12, 36, 26, .5), rgba(6, 16, 12, .7))
+    }
+
+    .order-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .order-top .amt {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 17px;
+      font-weight: 600
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10.5px;
+      padding: 3px 9px;
+      border-radius: 20px
+    }
+
+    .badge-gold {
+      background: var(--gold-soft);
+      color: var(--gold);
+      border: 1px solid var(--line-gold)
+    }
+
+    .badge-blue {
+      background: var(--brand-soft);
+      color: var(--brand-bright);
+      border: 1px solid var(--line-brand)
+    }
+
+    .badge-gray {
+      background: rgba(255, 255, 255, .05);
+      color: var(--muted);
+      border: 1px solid var(--line)
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      border-top: 1px dashed var(--line);
+      padding-top: 10px
+    }
+
+    .og .l {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    .og .v {
+      font-size: 12.5px;
+      font-family: 'Chakra Petch', monospace;
+      margin-top: 1px
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--faint);
+      font-size: 12.5px;
+      border: 1px dashed var(--line);
+      border-radius: 13px
+    }
+
+    /* ===== KV / 列表 ===== */
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 13px
+    }
+
+    .kv:last-child {
+      border-bottom: 0
+    }
+
+    .kv .k {
+      color: var(--muted)
+    }
+
+    .kv .v {
+      text-align: right;
+      word-break: break-all
+    }
+
+    .gold-text {
+      color: var(--gold)
+    }
+
+    .blue-text {
+      color: var(--brand-bright)
+    }
+
+    .rule-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px
+    }
+
+    .rule-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.65
+    }
+
+    .rule-list li svg {
+      flex: none;
+      margin-top: 3px
+    }
+
+    .rule-list li b {
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 13px;
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .mini .l {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    .mini .v {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 18px;
+      margin-top: 2px
+    }
+
+    .menu {
+      overflow: hidden;
+      margin-bottom: 14px
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      background: none;
+      width: 100%;
+      text-align: left;
+      color: var(--text);
+      font-size: 13.5px;
+      cursor: pointer
+    }
+
+    .menu-item:last-child {
+      border-bottom: 0
+    }
+
+    .menu-item .mi {
+      color: var(--brand-bright);
+      display: flex
+    }
+
+    .menu-item .chev {
+      margin-left: auto;
+      color: var(--faint)
+    }
+
+    .menu-item:active {
+      background: rgba(255, 255, 255, .04)
+    }
+
+    /* ===== 个人中心头部 ===== */
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 14px
+    }
+
+    .profile img {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 1px solid var(--line-brand)
+    }
+
+    .profile .pn .ad {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 13px;
+      margin-top: 3px
+    }
+
+    .profile .pn .tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 7px;
+      flex-wrap: wrap
+    }
+
+    .member-card {
+      background: linear-gradient(160deg, rgba(14, 52, 34, .72), rgba(6, 18, 14, .86))
+    }
+
+    .member-card .profile {
+      margin-bottom: 12px
+    }
+
+    .member-bnb {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px dashed var(--line);
+      padding-top: 11px;
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .card .lrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 2px;
+      cursor: pointer;
+      position: relative
+    }
+
+    .card .lrow:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      bottom: 0;
+      height: 1px;
+      background: var(--line)
+    }
+
+    .card .lrow .lrow-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text)
+    }
+
+    .card .lrow .lrow-sub {
+      font-size: 12px;
+      color: var(--faint);
+      margin-top: 3px
+    }
+
+    .card .lrow .lrow-ic {
+      margin-left: auto;
+      color: var(--muted);
+      display: flex;
+      flex: none
+    }
+
+    .card .lrow:first-of-type {
+      padding-top: 6px
+    }
+
+    .card .lrow:last-of-type {
+      padding-bottom: 4px
+    }
+
+    .card .lrow:active .lrow-label {
+      opacity: .75
+    }
+
+    /* ===== 成功 / 加载 ===== */
+    .centered {
+      text-align: center;
+      padding: 26px 16px
+    }
+
+    .ring-ok {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--gold-soft);
+      border: 1px solid var(--line-gold)
+    }
+
+    .spin {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, .2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: rot .8s linear infinite
+    }
+
+    .spin.gold {
+      border-color: rgba(228, 188, 78, .3);
+      border-top-color: var(--gold)
+    }
+
+    @keyframes rot {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .chain {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0 16px
+    }
+
+    .chain-node {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      padding: 13px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, .3)
+    }
+
+    .chain-node.me {
+      border-color: var(--line-gold);
+      background: var(--gold-soft)
+    }
+
+    .chain-node .role {
+      font-size: 11px;
+      color: var(--faint);
+      margin-bottom: 5px
+    }
+
+    .chain-node.me .role {
+      color: var(--gold)
+    }
+
+    .chain-node .ad {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11px;
+      word-break: break-all
+    }
+
+    .chain-arrow {
+      color: var(--faint);
+      flex: none
+    }
+
+    /* ===== 底部地球 ===== */
+    .earth {
+      position: relative;
+      height: 200px;
+      margin: 14px -16px -110px;
+      background: url(../assets/earth.png);
+      background-size: 100% auto;
+      background-repeat: no-repeat;
+      background-position: 50% 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 44px
+    }
+
+    .earth .ewm {
+      font-family: 'Chakra Petch', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 3px
+    }
+
+    .earth .ewm .a {
+      color: var(--gold)
+    }
+
+    .earth .ewm .k {
+      color: #fff
+    }
+
+    .earth .ewm .n {
+      color: var(--brand-bright)
+    }
+
+    .earth .et {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 2px
+    }
+
+    .earth .eln {
+      width: 24px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 1px;
+      margin: 9px 0
+    }
+
+    .earth .een {
+      font-size: 9px;
+      color: var(--faint);
+      letter-spacing: 3px;
+      font-family: 'Chakra Petch', monospace
+    }
+
+    /* ===== 底部 TabBar ===== */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 80;
+      display: flex;
+      border-top: 1px solid var(--line);
+      background: rgba(4, 14, 10, .94);
+      backdrop-filter: blur(14px);
+      padding: 7px 0 calc(7px + env(safe-area-inset-bottom))
+    }
+
+    a.tab {
+      text-decoration: none
+    }
+
+    .tab {
+      flex: 1;
+      background: none;
+      border: 0;
+      color: var(--faint);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 10.5px;
+      cursor: pointer
+    }
+
+    .tab.on {
+      color: var(--brand)
+    }
+
+    .tab svg {
+      width: 22px;
+      height: 22px
+    }
+
+    /* ===== toast ===== */
+    .toast-wrap {
+      position: fixed;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      max-width: 440px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      align-items: center;
+      padding: 0 16px
+    }
+
+    .toast {
+      background: rgba(10, 24, 16, .96);
+      border: 1px solid var(--line-brand);
+      border-radius: 11px;
+      padding: 11px 17px;
+      font-size: 13px;
+      color: var(--text);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, .5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn .3s ease;
+      max-width: 100%
+    }
+
+    .toast.err {
+      border-color: rgba(255, 90, 90, .45)
+    }
+
+    .toast.ok {
+      border-color: var(--line-gold)
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+.btn:disabled {
+  opacity: .72;
+  cursor: default
+}

@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AKN · 源律 DApp</title>
+  <link rel="icon" href="assets/icon.png">
+  <link rel="stylesheet"
+    href="https://miaoda.feishu.cn/fonts/css2?family=Chakra+Petch:wght@500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+  <style>
+    :root {
+      --bg: #040C08;
+      --bg2: #07140E;
+      --gold: #E4BC4E;
+      --gold-deep: #B8902C;
+      --gold-soft: rgba(228, 188, 78, .13);
+      --brand: #12C45C;
+      --brand-bright: #5EE89A;
+      --brand-deep: #0B7A42;
+      --brand-soft: rgba(18, 196, 92, .12);
+      --text: #E8F6EE;
+      --muted: #8AA89A;
+      --faint: #5E7368;
+      --line: rgba(255, 255, 255, .09);
+      --line-gold: rgba(228, 188, 78, .35);
+      --line-brand: rgba(18, 196, 92, .35);
+      --green: #35D98A;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    html,
+    body {
+      background: #020806
+    }
+
+    body {
+      font-family: 'Noto Sans SC', 'Chakra Petch', -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    button {
+      font-family: inherit
+    }
+
+    .mono {
+      font-family: 'Chakra Petch', ui-monospace, monospace
+    }
+
+    /* ===== App 容器（H5 手机宽） ===== */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+      background:
+        radial-gradient(500px 320px at 10% -6%, rgba(18, 196, 92, .13), transparent 60%),
+        radial-gradient(520px 340px at 95% -4%, rgba(228, 188, 78, .07), transparent 58%),
+        var(--bg);
+      box-shadow: 0 0 70px rgba(0, 0, 0, .65);
+      overflow: hidden
+    }
+
+    .view {
+      display: none;
+      padding: 0 16px 110px
+    }
+
+    .view.active {
+      display: block;
+      animation: viewIn .3s ease
+    }
+
+    @keyframes viewIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* ===== 顶部品牌头 ===== */
+    .app-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 14px 16px 10px
+    }
+
+    .app-head img.hlogo {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%
+    }
+
+    .wm {
+      font-family: 'Chakra Petch', monospace;
+      font-weight: 700;
+      font-size: 23px;
+      letter-spacing: 2px;
+      line-height: 1
+    }
+
+    .wm .a {
+      color: var(--gold)
+    }
+
+    .wm .k {
+      color: #fff
+    }
+
+    .wm .n {
+      color: var(--brand-bright)
+    }
+
+    .wm-tg {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 7.5px;
+      letter-spacing: 2.2px;
+      color: var(--faint);
+      margin-top: 3px
+    }
+
+    .wallet-pill {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      max-width: 190px;
+      padding: 9px 13px;
+      border-radius: 22px;
+      background: rgba(18, 196, 92, .1);
+      border: 1px solid var(--line-brand);
+      color: var(--brand-bright);
+      font-family: 'Chakra Petch', monospace;
+      font-size: 12.5px;
+      cursor: pointer;
+      white-space: nowrap
+    }
+
+    .wallet-pill .chev {
+      flex: none;
+      opacity: .8
+    }
+
+    .wallet-pill.off {
+      background: rgba(255, 255, 255, .04);
+      border-color: var(--line);
+      color: var(--muted)
+    }
+
+    .wallet-pill:not(.off) {
+      background: rgba(18, 196, 92, .18);
+      border-color: var(--brand-bright);
+      box-shadow: 0 0 0 1px rgba(94, 232, 154, .22), 0 0 16px rgba(18, 196, 92, .38)
+    }
+
+    /* ===== 通用卡片 ===== */
+    .card {
+      background: linear-gradient(160deg, rgba(12, 36, 26, .6), rgba(6, 16, 12, .82));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 14px
+    }
+
+    .card h3 {
+      font-size: 15.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px
+    }
+
+    .card h3 .bar {
+      width: 3px;
+      height: 14px;
+      border-radius: 2px;
+      background: linear-gradient(var(--gold), var(--gold-deep))
+    }
+
+    .card h3 .right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--faint);
+      font-size: 12px;
+      font-weight: 400;
+      background: none;
+      border: 0;
+      cursor: pointer
+    }
+
+    .sec-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin: 18px 0 11px;
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .sec-title .bar {
+      width: 3px;
+      height: 15px;
+      border-radius: 2px;
+      background: linear-gradient(var(--brand), var(--brand-bright))
+    }
+
+    .note-box {
+      font-size: 12px;
+      color: var(--faint);
+      background: rgba(255, 255, 255, .03);
+      border: 1px dashed var(--line);
+      border-radius: 11px;
+      padding: 11px 13px;
+      margin-top: 12px;
+      line-height: 1.7
+    }
+
+    /* ===== 状态条 ===== */
+    .stat-strip {
+      display: flex;
+      align-items: center;
+      border-radius: 16px;
+      padding: 14px 6px;
+      margin-bottom: 14px;
+      background: linear-gradient(160deg, rgba(12, 36, 26, .6), rgba(6, 16, 12, .82));
+      border: 1px solid var(--line)
+    }
+
+    .stat-strip .ss {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 0
+    }
+
+    .stat-strip .ss+.ss {
+      border-left: 1px solid var(--line)
+    }
+
+    .stat-strip .ss .l1 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text)
+    }
+
+    .stat-strip .ss .l2 {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    .stat-strip .ss .v {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--brand-bright)
+    }
+
+    .gdot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 9px var(--green)
+    }
+
+    /* ===== 我的资产卡 ===== */
+    .asset-card {
+      position: relative;
+      overflow: hidden
+    }
+
+    .ring-deco {
+      position: absolute;
+      right: -20px;
+      top: -40px;
+      width: 330px;
+      pointer-events: none
+    }
+
+    .asset-info {
+      position: relative;
+      z-index: 2;
+      width: 64%
+    }
+
+    .eye {
+      background: none;
+      border: 0;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      vertical-align: middle;
+      margin-left: 4px
+    }
+
+    .big-num {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      margin: 6px 0 2px
+    }
+
+    .usd-line {
+      font-size: 12.5px;
+      color: var(--muted)
+    }
+
+    .up {
+      color: var(--green)
+    }
+
+    .slogan {
+      position: absolute;
+      right: 18px;
+      top: 26px;
+      width: 138px;
+      text-align: right;
+      z-index: 2
+    }
+
+    .slogan .zh {
+      font-size: 14px;
+      color: #E6F4EC;
+      letter-spacing: 2px;
+      line-height: 1.45;
+      text-shadow: 0 1px 10px rgba(4, 12, 8, .95)
+    }
+
+    .slogan .ln {
+      width: 22px;
+      height: 2px;
+      background: var(--gold);
+      margin: 6px 0 6px auto;
+      border-radius: 1px
+    }
+
+    .slogan .en {
+      font-size: 9px;
+      color: #96B0A2;
+      line-height: 1.5;
+      font-family: 'Chakra Petch', monospace;
+      text-shadow: 0 1px 8px rgba(4, 12, 8, .95)
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 11px;
+      margin-top: 20px;
+      position: relative;
+      z-index: 2
+    }
+
+    /* ===== 按钮 ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 12px;
+      border: 0;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: .2s
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #F2CE6E, var(--gold) 45%, var(--gold-deep));
+      color: #14181f
+    }
+
+    .btn-gold:active {
+      filter: brightness(1.06)
+    }
+
+    .btn-blue {
+      background: linear-gradient(135deg, #4ADE80, var(--brand) 50%, var(--brand-deep));
+      color: #fff
+    }
+
+    .btn-blue:active {
+      filter: brightness(1.1)
+    }
+
+    .btn-dark {
+      background: linear-gradient(135deg, rgba(18, 78, 48, .92), rgba(8, 40, 26, .95));
+      border: 1px solid var(--line-brand);
+      color: #E7F8EE
+    }
+
+    .btn-dark:active {
+      filter: brightness(1.15)
+    }
+
+    .btn-ghost {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--line);
+      color: var(--text)
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .btn-sm {
+      width: auto;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      border-radius: 9px
+    }
+
+    /* ===== 周期 / 套餐选择 ===== */
+    .sub-hd {
+      font-size: 12px;
+      color: var(--faint);
+      margin: -6px 0 13px
+    }
+
+    .periods {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px
+    }
+
+    .period {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 2px;
+      text-align: center;
+      background: rgba(0, 0, 0, .25);
+      color: var(--text);
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .period .pv {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      display: block;
+      line-height: 1.2
+    }
+
+    .period .pl {
+      font-size: 10.5px;
+      color: var(--faint);
+      display: block;
+      margin-top: 3px
+    }
+
+    .period.on {
+      background: linear-gradient(135deg, #4ADE80, var(--brand) 50%, var(--brand-deep));
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(18, 196, 92, .32)
+    }
+
+    .period.on .pv {
+      color: #fff
+    }
+
+    .period.on .pl {
+      color: rgba(255, 255, 255, .85)
+    }
+
+    /* ===== 首页投资周期：连体分段选择 ===== */
+    .seg {
+      display: flex;
+      border: 1px solid var(--line-brand);
+      border-radius: 13px;
+      padding: 4px;
+      background: rgba(18, 196, 92, .08)
+    }
+
+    .seg-item {
+      flex: 1;
+      background: none;
+      border: 0;
+      padding: 11px 2px;
+      text-align: center;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      min-width: 0
+    }
+
+    .seg-item+.seg-item {
+      border-left: 1px solid rgba(18, 196, 92, .22)
+    }
+
+    .seg-item .sv {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 19px;
+      font-weight: 700;
+      display: block;
+      line-height: 1.2;
+      color: var(--text)
+    }
+
+    .seg-item .sl {
+      font-size: 10.5px;
+      color: var(--faint);
+      display: block;
+      margin-top: 3px
+    }
+
+    .seg-item.on {
+      border-radius: 10px;
+      background: linear-gradient(135deg, #F2CE6E, var(--gold) 50%, var(--gold-deep))
+    }
+
+    .seg-item.on .sv {
+      color: #14181f
+    }
+
+    .seg-item.on .sl {
+      color: rgba(20, 24, 31, .72)
+    }
+
+    .seg-item.on+.seg-item {
+      border-left-color: transparent
+    }
+
+    /* ===== 环形图面板 ===== */
+    .donut-panel {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 15px;
+      margin-top: 13px;
+      background: rgba(0, 0, 0, .22)
+    }
+
+    .donut {
+      width: 108px;
+      height: 108px;
+      flex: none;
+      position: relative
+    }
+
+    .donut svg {
+      transform: rotate(-90deg)
+    }
+
+    .donut .dc {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-family: 'Chakra Petch', monospace;
+      font-size: 19px;
+      font-weight: 700
+    }
+
+    .donut-meta {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .dm .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle
+    }
+
+    .dm .t {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .dm .p {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 21px;
+      font-weight: 700;
+      margin: 2px 0
+    }
+
+    .dm .a {
+      font-size: 11px;
+      color: var(--faint)
+    }
+
+    .guarantee {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      background: rgba(18, 196, 92, .06);
+      color: var(--muted);
+      font-size: 12.5px;
+      cursor: pointer;
+      width: 100%
+    }
+
+    .guarantee .chev {
+      margin-left: auto;
+      color: var(--faint)
+    }
+
+    /* ===== 倒计时横幅 ===== */
+    .count-banner {
+      border-radius: 16px;
+      padding: 16px;
+      margin: 16px 0 14px;
+      background: linear-gradient(120deg, rgba(11, 122, 66, .2), rgba(228, 188, 78, .08));
+      border: 1px solid var(--line-brand)
+    }
+
+    .count-banner.live {
+      border-color: var(--line-gold);
+      background: linear-gradient(120deg, rgba(228, 188, 78, .16), rgba(11, 122, 66, .1))
+    }
+
+    .count-banner .ct {
+      font-size: 15px;
+      font-weight: 500
+    }
+
+    .count-banner .cs {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .demo-link {
+      background: none;
+      border: 0;
+      color: var(--faint);
+      font-size: 11.5px;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 5px;
+      padding: 0
+    }
+
+    .demo-link:active {
+      color: var(--gold)
+    }
+
+    .count-cells {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-top: 12px
+    }
+
+    .count-cell {
+      text-align: center;
+      background: rgba(0, 0, 0, .32);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 8px 2px
+    }
+
+    .count-cell b {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 19px;
+      font-weight: 600;
+      display: block;
+      color: var(--brand-bright)
+    }
+
+    .count-cell span {
+      font-size: 10px;
+      color: var(--faint)
+    }
+
+    .count-banner.live .count-cell b {
+      color: var(--gold)
+    }
+
+    .live-pill {
+      grid-column: 1/-1;
+      text-align: center;
+      background: rgba(0, 0, 0, .3);
+      border: 1px solid var(--line-gold);
+      border-radius: 11px;
+      padding: 10px;
+      margin-top: 12px;
+      font-family: 'Chakra Petch', monospace;
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 1px
+    }
+
+    /* ===== 收款地址 ===== */
+    .addr-main {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 11px 12px;
+      margin-bottom: 12px
+    }
+
+    .addr-main .seq {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11px;
+      color: var(--gold);
+      border: 1px solid var(--line-gold);
+      border-radius: 7px;
+      padding: 3px 7px;
+      flex: none
+    }
+
+    .addr-main .ad {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11.5px;
+      word-break: break-all;
+      flex: 1
+    }
+
+    .icon-btn {
+      flex: none;
+      width: 31px;
+      height: 31px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .04);
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center
+    }
+
+    .icon-btn:active {
+      color: var(--gold);
+      border-color: var(--line-gold)
+    }
+
+    .progress {
+      height: 7px;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, .07);
+      overflow: hidden;
+      margin: 6px 0
+    }
+
+    .progress i {
+      display: block;
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--brand), var(--brand-bright));
+      transition: width .5s
+    }
+
+    .pf-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      color: var(--faint);
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .seq-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 13px
+    }
+
+    .seq-dot {
+      width: 21px;
+      height: 21px;
+      border-radius: 6px;
+      font-size: 9px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--line);
+      color: var(--faint);
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .seq-dot.done {
+      background: rgba(228, 188, 78, .12);
+      border-color: var(--line-gold);
+      color: var(--gold)
+    }
+
+    .seq-dot.cur {
+      background: rgba(18, 196, 92, .16);
+      border-color: var(--line-brand);
+      color: var(--brand-bright)
+    }
+
+    /* ===== 表单 ===== */
+    .field {
+      margin-bottom: 14px
+    }
+
+    .field label {
+      display: block;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 6px
+    }
+
+    .input {
+      width: 100%;
+      background: rgba(0, 0, 0, .35);
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .input:focus {
+      border-color: var(--line-brand);
+      box-shadow: 0 0 0 3px rgba(18, 196, 92, .1)
+    }
+
+    .input.err {
+      border-color: rgba(255, 90, 90, .5)
+    }
+
+    .input::placeholder {
+      color: rgba(70, 92, 82, .5)
+    }
+
+    .input-wrap {
+      position: relative
+    }
+
+    .input-wrap .suffix {
+      position: absolute;
+      right: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--faint);
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .field .hint {
+      font-size: 11.5px;
+      color: var(--faint);
+      margin-top: 6px
+    }
+
+    /* ===== 测算表 ===== */
+    .est-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px
+    }
+
+    .est-table th,
+    .est-table td {
+      padding: 9px 4px;
+      text-align: right;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .est-table th:first-child,
+    .est-table td:first-child {
+      text-align: left
+    }
+
+    .est-table th {
+      color: var(--faint);
+      font-weight: 400;
+      font-size: 11px
+    }
+
+    .est-table td {
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .est-table tr:last-child td {
+      border-bottom: 0
+    }
+
+    .est-table .hl {
+      color: var(--gold)
+    }
+
+    /* ===== 订单 ===== */
+    .order {
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 14px 15px;
+      margin-bottom: 11px;
+      background: linear-gradient(160deg, rgba(12, 36, 26, .5), rgba(6, 16, 12, .7))
+    }
+
+    .order-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .order-top .amt {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 17px;
+      font-weight: 600
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 10.5px;
+      padding: 3px 9px;
+      border-radius: 20px
+    }
+
+    .badge-gold {
+      background: var(--gold-soft);
+      color: var(--gold);
+      border: 1px solid var(--line-gold)
+    }
+
+    .badge-blue {
+      background: var(--brand-soft);
+      color: var(--brand-bright);
+      border: 1px solid var(--line-brand)
+    }
+
+    .badge-gray {
+      background: rgba(255, 255, 255, .05);
+      color: var(--muted);
+      border: 1px solid var(--line)
+    }
+
+    .order-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      border-top: 1px dashed var(--line);
+      padding-top: 10px
+    }
+
+    .og .l {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    .og .v {
+      font-size: 12.5px;
+      font-family: 'Chakra Petch', monospace;
+      margin-top: 1px
+    }
+
+    .empty {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--faint);
+      font-size: 12.5px;
+      border: 1px dashed var(--line);
+      border-radius: 13px
+    }
+
+    /* ===== KV / 列表 ===== */
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 13px
+    }
+
+    .kv:last-child {
+      border-bottom: 0
+    }
+
+    .kv .k {
+      color: var(--muted)
+    }
+
+    .kv .v {
+      text-align: right;
+      word-break: break-all
+    }
+
+    .gold-text {
+      color: var(--gold)
+    }
+
+    .blue-text {
+      color: var(--brand-bright)
+    }
+
+    .rule-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px
+    }
+
+    .rule-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.65
+    }
+
+    .rule-list li svg {
+      flex: none;
+      margin-top: 3px
+    }
+
+    .rule-list li b {
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 16px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 13px;
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .mini .l {
+      font-size: 10.5px;
+      color: var(--faint)
+    }
+
+    .mini .v {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 18px;
+      margin-top: 2px
+    }
+
+    .menu {
+      overflow: hidden;
+      margin-bottom: 14px
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      background: none;
+      width: 100%;
+      text-align: left;
+      color: var(--text);
+      font-size: 13.5px;
+      cursor: pointer
+    }
+
+    .menu-item:last-child {
+      border-bottom: 0
+    }
+
+    .menu-item .mi {
+      color: var(--brand-bright);
+      display: flex
+    }
+
+    .menu-item .chev {
+      margin-left: auto;
+      color: var(--faint)
+    }
+
+    .menu-item:active {
+      background: rgba(255, 255, 255, .04)
+    }
+
+    /* ===== 个人中心头部 ===== */
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 14px
+    }
+
+    .profile img {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 1px solid var(--line-brand)
+    }
+
+    .profile .pn .ad {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 13px;
+      margin-top: 3px
+    }
+
+    .profile .pn .tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 7px;
+      flex-wrap: wrap
+    }
+
+    .member-card {
+      background: linear-gradient(160deg, rgba(14, 52, 34, .72), rgba(6, 18, 14, .86))
+    }
+
+    .member-card .profile {
+      margin-bottom: 12px
+    }
+
+    .member-bnb {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      border-top: 1px dashed var(--line);
+      padding-top: 11px;
+      font-family: 'Chakra Petch', monospace
+    }
+
+    .card .lrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 2px;
+      cursor: pointer;
+      position: relative
+    }
+
+    .card .lrow:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      right: 2px;
+      bottom: 0;
+      height: 1px;
+      background: var(--line)
+    }
+
+    .card .lrow .lrow-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text)
+    }
+
+    .card .lrow .lrow-sub {
+      font-size: 12px;
+      color: var(--faint);
+      margin-top: 3px
+    }
+
+    .card .lrow .lrow-ic {
+      margin-left: auto;
+      color: var(--muted);
+      display: flex;
+      flex: none
+    }
+
+    .card .lrow:first-of-type {
+      padding-top: 6px
+    }
+
+    .card .lrow:last-of-type {
+      padding-bottom: 4px
+    }
+
+    .card .lrow:active .lrow-label {
+      opacity: .75
+    }
+
+    /* ===== 成功 / 加载 ===== */
+    .centered {
+      text-align: center;
+      padding: 26px 16px
+    }
+
+    .ring-ok {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--gold-soft);
+      border: 1px solid var(--line-gold)
+    }
+
+    .spin {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, .2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: rot .8s linear infinite
+    }
+
+    .spin.gold {
+      border-color: rgba(228, 188, 78, .3);
+      border-top-color: var(--gold)
+    }
+
+    @keyframes rot {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .chain {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0 16px
+    }
+
+    .chain-node {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      padding: 13px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, .3)
+    }
+
+    .chain-node.me {
+      border-color: var(--line-gold);
+      background: var(--gold-soft)
+    }
+
+    .chain-node .role {
+      font-size: 11px;
+      color: var(--faint);
+      margin-bottom: 5px
+    }
+
+    .chain-node.me .role {
+      color: var(--gold)
+    }
+
+    .chain-node .ad {
+      font-family: 'Chakra Petch', monospace;
+      font-size: 11px;
+      word-break: break-all
+    }
+
+    .chain-arrow {
+      color: var(--faint);
+      flex: none
+    }
+
+    /* ===== 底部地球 ===== */
+    .earth {
+      position: relative;
+      height: 200px;
+      margin: 14px -16px -110px;
+      background: url(assets/earth.png);
+      background-size: 100% auto;
+      background-repeat: no-repeat;
+      background-position: 50% 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 44px
+    }
+
+    .earth .ewm {
+      font-family: 'Chakra Petch', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 3px
+    }
+
+    .earth .ewm .a {
+      color: var(--gold)
+    }
+
+    .earth .ewm .k {
+      color: #fff
+    }
+
+    .earth .ewm .n {
+      color: var(--brand-bright)
+    }
+
+    .earth .et {
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 2px
+    }
+
+    .earth .eln {
+      width: 24px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 1px;
+      margin: 9px 0
+    }
+
+    .earth .een {
+      font-size: 9px;
+      color: var(--faint);
+      letter-spacing: 3px;
+      font-family: 'Chakra Petch', monospace
+    }
+
+    /* ===== 底部 TabBar ===== */
+    .tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      z-index: 80;
+      display: flex;
+      border-top: 1px solid var(--line);
+      background: rgba(4, 14, 10, .94);
+      backdrop-filter: blur(14px);
+      padding: 7px 0 calc(7px + env(safe-area-inset-bottom))
+    }
+
+    .tab {
+      flex: 1;
+      background: none;
+      border: 0;
+      color: var(--faint);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 10.5px;
+      cursor: pointer
+    }
+
+    .tab.on {
+      color: var(--gold)
+    }
+
+    .tab svg {
+      width: 22px;
+      height: 22px
+    }
+
+    /* ===== toast ===== */
+    .toast-wrap {
+      position: fixed;
+      bottom: 84px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      max-width: 440px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      align-items: center;
+      padding: 0 16px
+    }
+
+    .toast {
+      background: rgba(10, 24, 16, .96);
+      border: 1px solid var(--line-brand);
+      border-radius: 11px;
+      padding: 11px 17px;
+      font-size: 13px;
+      color: var(--text);
+      box-shadow: 0 10px 36px rgba(0, 0, 0, .5);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: toastIn .3s ease;
+      max-width: 100%
+    }
+
+    .toast.err {
+      border-color: rgba(255, 90, 90, .45)
+    }
+
+    .toast.ok {
+      border-color: var(--line-gold)
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <!-- ===== 顶部品牌头 ===== -->
+    <header class="app-head">
+      <img class="hlogo" src="assets/logo.png" alt="AKN">
+      <div>
+        <div class="wm"><span class="a">A</span><span class="k">K</span><span class="n">N</span></div>
+        <div class="wm-tg">CODE · <span style="color:var(--brand)">LIQUIDITY</span> · CONSENSUS</div>
+      </div>
+      <button class="wallet-pill off" id="walletPill" onclick="onWalletClick()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="6" width="20" height="14" rx="2" />
+          <path d="M16 13h2" />
+          <path d="M2 10h20" />
+        </svg>
+        <span id="walletTxt">连接钱包</span>
+        <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.4">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- ===== 视图：首页 ===== -->
+    <section class="view" id="view-home">
+      <div class="stat-strip">
+        <div class="ss">
+          <div class="l1"><span class="gdot"></span>网络正常</div>
+          <div class="l2">Network Healthy</div>
+        </div>
+        <div class="ss">
+          <div class="v">25,843,671</div>
+          <div class="l2">总锁仓量 (USDT)</div>
+        </div>
+        <div class="ss">
+          <div class="l1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>128,421</div>
+          <div class="l2">社区成员</div>
+        </div>
+      </div>
+
+      <div class="card asset-card">
+        <img class="ring-deco" src="assets/ring.png" alt="">
+        <div class="asset-info">
+          <div style="font-size:14px;color:var(--muted)">我的资产 (USDT)
+            <button class="eye" onclick="toggleEye()" title="隐藏/显示">
+              <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <div class="big-num" id="homeBalance">1,283.50</div>
+          <div class="usd-line">≈ $1,283.50　<span class="up">+2.35% (24h)</span></div>
+        </div>
+        <div class="slogan">
+          <div class="zh">源于代码<br>律于共识</div>
+          <div class="ln"></div>
+          <div class="en">Code is the source.<br>Consensus is the rule.</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="onRecharge()"><svg width="17" height="17" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <path d="M7 10l5 5 5-5" />
+              <path d="M12 15V3" />
+            </svg>充值</button>
+          <button class="btn btn-dark" onclick="onWithdraw()"><svg width="17" height="17" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <path d="M17 8l-5-5-5 5" />
+              <path d="M12 3v12" />
+            </svg>提现</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="bar"></span>投资周期
+          <button class="right" onclick="cycleExplain()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>周期说明</button>
+        </h3>
+        <div class="sub-hd">选择周期，开启 AKN 价值循环</div>
+        <div class="seg" id="homePeriods"></div>
+        <div class="donut-panel">
+          <div class="donut">
+            <svg width="108" height="108" viewBox="0 0 108 108">
+              <circle id="donutBlue" cx="54" cy="54" r="46" fill="none" stroke="url(#gBlue)" stroke-width="12" />
+              <circle id="donutGold" cx="54" cy="54" r="46" fill="none" stroke="url(#gGold)" stroke-width="12" />
+              <defs>
+                <linearGradient id="gBlue" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#0B7A42" />
+                  <stop offset="1" stop-color="#5EE89A" />
+                </linearGradient>
+                <linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#caa244" />
+                  <stop offset="1" stop-color="#E4BC4E" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="dc">100%</div>
+          </div>
+          <div class="donut-meta">
+            <div class="dm">
+              <div class="t"><span class="dot" style="background:var(--brand-bright)"></span>投资比例</div>
+              <div class="p" id="dmInvPct">80%</div>
+              <div class="a" id="dmInvAmt">投资 800 USDT</div>
+            </div>
+            <div class="dm">
+              <div class="t"><span class="dot" style="background:var(--gold)"></span>保险比例</div>
+              <div class="p" id="dmInsPct">20%</div>
+              <div class="a" id="dmInsAmt">保险 200 USDT</div>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-gold" style="margin-top:14px" onclick="goInvest()">开始投资
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path d="M5 12h14" />
+            <path d="m13 6 6 6-6 6" />
+          </svg></button>
+        <button class="guarantee" onclick="guaranteeInfo()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#5EE89A" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M9 12h6M12 9v6" />
+          </svg>
+          智能合约保障 · 公开透明 · 收益自动结算
+          <span class="chev"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.2">
+              <path d="m9 18 6-6-6-6" />
+            </svg></span>
+        </button>
+      </div>
+
+      <div class="earth">
+        <div class="ewm"><span class="a">A</span><span class="k">K</span><span class="n">N</span></div>
+        <div class="et">链接代码与价值的未来</div>
+        <div class="eln"></div>
+        <div class="een">A MORE OPEN FINANCIAL WORLD</div>
+      </div>
+    </section>
+
+    <!-- ===== 视图：投资 ===== -->
+    <section class="view" id="view-invest">
+      <div class="sec-title" style="margin-top:16px"><span class="bar"></span>参与 AKN 预售</div>
+      <div class="count-banner" id="countBanner">
+        <div class="ct" id="countTitle">距预售开始</div>
+        <div class="cs" id="countSub">2026 年 10 月 2 日 14:00（太平洋时间）</div>
+        <button class="demo-link" id="demoLink" onclick="toggleDemo()">演示模式：模拟预售已开始</button>
+        <div class="count-cells" id="countCells"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="bar"></span>选择套餐并参与</h3>
+        <div class="periods" id="invPeriods"></div>
+        <div class="field" style="margin-top:14px">
+          <label>投资金额（USDT）</label>
+          <div class="input-wrap">
+            <input class="input" id="amountInput" type="number" min="100" max="10000" step="1"
+              placeholder="输入 100 ~ 10,000 的整数金额" oninput="onAmountInput()">
+            <span class="suffix">USDT</span>
+          </div>
+          <div class="hint" id="amountHint">金额须为 1 的整数倍；可投多笔，每笔金额须大于等于上一笔。</div>
+        </div>
+        <button class="btn btn-blue" id="investBtn" onclick="invest()">确认参与预售</button>
+        <div class="note-box" id="investNote"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="bar"></span>预售收款合约（30 地址轮序）</h3>
+        <div class="addr-main">
+          <span class="seq" id="curSeq">#01</span>
+          <span class="ad" id="curAddr"></span>
+          <button class="icon-btn" onclick="copyCurAddr()" title="复制地址">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
+        </div>
+        <div class="progress"><i id="curProg" style="width:0%"></i></div>
+        <div class="pf-meta"><span id="curRaised">0 / 100,000 USDT</span><span>满额自动切换</span></div>
+        <div class="seq-dots" id="seqDots"></div>
+      </div>
+
+      <div class="sec-title"><span class="bar"></span>收益测算（预售期统一 1% / 24h，以 LP 结算）</div>
+      <div class="card">
+        <table class="est-table">
+          <thead>
+            <tr>
+              <th>持有时间</th>
+              <th>1 天</th>
+              <th>7 天</th>
+              <th>15 天</th>
+              <th>30 天</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="hl">累计静态 LP</td>
+              <td id="est1">—</td>
+              <td id="est7">—</td>
+              <td id="est15">—</td>
+              <td id="est30">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note-box" id="rateNote"></div>
+      </div>
+
+      <div class="sec-title"><span class="bar"></span>我的预售订单</div>
+      <div id="orderList"></div>
+    </section>
+
+    <!-- ===== 视图：团队 ===== -->
+    <section class="view" id="view-team">
+      <div class="sec-title" style="margin-top:16px"><span class="bar"></span>我的团队</div>
+      <div class="mini-grid">
+        <div class="mini">
+          <div class="l">直推人数</div>
+          <div class="v" id="tmDirect">0</div>
+        </div>
+        <div class="mini">
+          <div class="l">有效会员</div>
+          <div class="v" id="tmValid">0</div>
+        </div>
+        <div class="mini">
+          <div class="l">团队业绩 (USDT)</div>
+          <div class="v" id="tmVol">0</div>
+        </div>
+        <div class="mini">
+          <div class="l">可享代数</div>
+          <div class="v" id="tmGen">0 代</div>
+        </div>
+      </div>
+      <div id="bindBox" style="margin-top:14px"></div>
+      <div class="card" id="inviteCard" hidden>
+        <h3><span class="bar"></span>我的专属邀请链接</h3>
+        <div class="addr-main"><span class="ad" id="inviteLink" style="font-size:11px"></span>
+          <button class="icon-btn" onclick="copyInvite()" title="复制链接"><svg width="14" height="14" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg></button>
+        </div>
+        <button class="btn btn-blue btn-sm" style="width:100%;margin-top:4px" onclick="savePoster()">保存邀请海报</button>
+      </div>
+      <div class="card">
+        <h3><span class="bar"></span>推荐规则</h3>
+        <ul class="rule-list">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            <span><b>有效推荐</b>：推荐人必须正在产生收益；已出局或未投资的空号向上紧缩。</span>
+          </li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12C45C" stroke-width="2">
+              <path d="M12 2 2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+            <span>直推 N 人即享 N 代，每代静态收益 <b>2%</b>，烧伤机制，最高 <b>15 代</b>。</span>
+          </li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12C45C" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+            <span>代数奖在<b>领取静态收益时同步结算</b>；紧缩部分奖给上方满足条件的地址。</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== 视图：我的 ===== -->
+    <section class="view" id="view-me">
+      <div class="card member-card" style="margin-top:16px">
+        <div class="profile">
+          <img src="assets/icon.png" alt="">
+          <div class="pn">
+            <div style="font-size:16px;font-weight:500">AKN 会员</div>
+            <div class="ad" id="meAddr">未连接钱包</div>
+            <div class="tags">
+              <span class="badge badge-gray" id="meBindBadge">未绑定</span>
+              <span class="badge badge-blue">BSC · BEP20</span>
+            </div>
+          </div>
+        </div>
+        <div class="member-bnb"><span>BNB 余额</span><span id="meBnb">--</span></div>
+      </div>
+
+      <div class="mini-grid">
+        <div class="mini">
+          <div class="l">累计投入 (USDT)</div>
+          <div class="v" id="meInvested">0</div>
+        </div>
+        <div class="mini">
+          <div class="l">预售订单</div>
+          <div class="v" id="meOrders">0 笔</div>
+        </div>
+        <div class="mini">
+          <div class="l">直推人数</div>
+          <div class="v" id="meDirect">0</div>
+        </div>
+        <div class="mini">
+          <div class="l">可享代数</div>
+          <div class="v" id="meGen">0 代</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="bar"></span>订单与资产</h3>
+        <div class="lrow" onclick="goTab('invest')">
+          <div class="lrow-txt">
+            <div class="lrow-label">我的订单</div>
+            <div class="lrow-sub">查看预售订单与收款进度</div>
+          </div>
+          <span class="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.9">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M3 10h18M8 2v4M16 2v4" />
+            </svg></span>
+        </div>
+        <div class="lrow" onclick="showPayer()">
+          <div class="lrow-txt">
+            <div class="lrow-label">当前收款地址</div>
+            <div class="lrow-sub">30 个地址轮序 · 满 10 万 U 自动切换</div>
+          </div>
+          <span class="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.9">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg></span>
+        </div>
+        <div class="lrow" onclick="redeemInfo()">
+          <div class="lrow-txt">
+            <div class="lrow-label">赎回说明</div>
+            <div class="lrow-sub">保险池可随时赎回，赎回后订单结束</div>
+          </div>
+          <span class="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.9">
+              <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+              <path d="M3 3v5h5" />
+            </svg></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="bar"></span>网络与支持</h3>
+        <div class="lrow" onclick="networkInfo()">
+          <div class="lrow-txt">
+            <div class="lrow-label">网络设置</div>
+            <div class="lrow-sub">BNB Smart Chain · BEP20</div>
+          </div>
+          <span class="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.9">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" />
+            </svg></span>
+        </div>
+        <div class="lrow" onclick="helpInfo()">
+          <div class="lrow-txt">
+            <div class="lrow-label">帮助中心</div>
+            <div class="lrow-sub">联系你的推荐人获取帮助</div>
+          </div>
+          <span class="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.9">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" />
+              <path d="M12 17h.01" />
+            </svg></span>
+        </div>
+        <div class="lrow" onclick="aboutInfo()">
+          <div class="lrow-txt">
+            <div class="lrow-label">关于 AKN</div>
+            <div class="lrow-sub">源律机制 · 源于代码，律于共识</div>
+          </div>
+          <span class="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="1.9">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg></span>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" id="disconnectBtn" hidden onclick="disconnectWallet()">断开钱包连接</button>
+    </section>
+
+    <!-- ===== 底部 TabBar ===== -->
+    <nav class="tabbar">
+      <button class="tab on" data-tab="home" onclick="goTab('home')"><svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <path d="M9 22V12h6v10" />
+        </svg>首页</button>
+      <button class="tab" data-tab="invest" onclick="goTab('invest')"><svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M3 3v18h18" />
+          <rect x="7" y="10" width="3" height="7" />
+          <rect x="12" y="6" width="3" height="11" />
+          <rect x="17" y="13" width="3" height="4" />
+        </svg>投资</button>
+      <button class="tab" data-tab="team" onclick="goTab('team')"><svg viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>团队</button>
+      <button class="tab" data-tab="me" onclick="goTab('me')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>我的</button>
+    </nav>
+
+    <div class="toast-wrap" id="toastWrap"></div>
+
+    <script>
+      /* ================= 状态 ================= */
+      const state = {
+        wallet: null, bound: false, inviter: '', bindTx: '', bindTs: 0,
+        pkg: 0, amount: null, orders: [], demo: false, hideBal: false,
+        payIdx: 6, payRaised: 63420, payers: []
+      };
+      /* ins=保险池比例  int=交互(投资)比例 */
+      const PKGS = [
+        { tag: '稳健增值', ins: 20, int: 80, rate: 1.0 },
+        { tag: '平衡收益', ins: 30, int: 70, rate: 1.5 },
+        { tag: '进阶增长', ins: 40, int: 60, rate: 2.0 },
+        { tag: '高效回报', ins: 50, int: 50, rate: 2.5 }
+      ];
+      const START = new Date('2026-10-02T14:00:00-07:00').getTime();
+      const PREVIEW_BASE = 1000;
+
+      /* ================= 工具 ================= */
+      function $(s) { return document.querySelector(s) }
+      function $all(s) { return Array.from(document.querySelectorAll(s)) }
+      function shortAddr(a) { return a ? a.slice(0, 6) + '…' + a.slice(-4) : '' }
+      function fmt(n) { return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }
+      function fmt0(n) { return Math.floor(n).toLocaleString('en-US') }
+      function rndHex(len) { let h = ''; for (let i = 0; i < len; i++)h += '0123456789abcdef'[Math.floor(Math.random() * 16)]; return h }
+      function genAddr() { return '0x' + rndHex(40) }
+      function genTx() { return '0x' + rndHex(64) }
+      function toast(msg, type) {
+        const t = document.createElement('div'); t.className = 'toast ' + (type || '');
+        t.innerHTML = (type === 'ok' ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>'
+          : type === 'err' ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff7a7a" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>'
+            : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5EE89A" stroke-width="2.4"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>')
+          + '<span>' + msg + '</span>';
+        $('#toastWrap').appendChild(t);
+        setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300) }, 2400);
+      }
+      function copyText(text, okMsg) {
+        const done = () => toast(okMsg || '已复制', 'ok');
+        if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done).catch(fallback); }
+        else fallback();
+        function fallback() {
+          const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); done() } catch (e) { toast('复制失败，请手动复制', 'err') } ta.remove();
+        }
+      }
+      /* 生成 30 个确定性收款地址 */
+      (function () {
+        const chars = '0123456789abcdef';
+        function h32(x) {
+          x = (x ^ (x >>> 16)) >>> 0; x = Math.imul(x, 0x85ebca6b) >>> 0;
+          x = (x ^ (x >>> 13)) >>> 0; x = Math.imul(x, 0xc2b2ae35) >>> 0;
+          return (x ^ (x >>> 16)) >>> 0;
+        }
+        for (let i = 0; i < 30; i++) {
+          let h = '0x';
+          for (let j = 0; j < 40; j++)h += chars[h32(0x9e3779b9 + i * 40 + j) & 0xf];
+          state.payers.push(h);
+        }
+      })();
+
+      /* ================= Tab 路由 ================= */
+      function goTab(t, silent) {
+        $all('.view').forEach(v => v.classList.remove('active'));
+        $('#view-' + t).classList.add('active');
+        $all('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+        window.scrollTo(0, 0);
+        if (!silent && location.hash !== '#/' + t) location.hash = '#/' + t;
+      }
+      function syncRoute() {
+        const h = (location.hash || '').replace('#/', '');
+        const t = ['home', 'invest', 'team', 'me'].includes(h) ? h : 'home';
+        goTab(t, true);
+      }
+      window.addEventListener('hashchange', syncRoute);
+
+      /* ================= 钱包 ================= */
+      function connectWallet() {
+        const addr = genAddr();
+        state.wallet = { addr, bnb: (0.18 + Math.random() * 0.7).toFixed(4) };
+        renderWallet(); renderBind(); renderMe();
+        toast('钱包已连接：' + shortAddr(addr), 'ok');
+      }
+      function onWalletClick() { state.wallet ? goTab('me') : connectWallet(); }
+      function disconnectWallet() {
+        state.wallet = null; state.bound = false; state.inviter = ''; state.orders = [];
+        renderWallet(); renderBind(); renderMe(); renderOrders();
+        toast('钱包已断开');
+      }
+      function renderWallet() {
+        const p = $('#walletPill'), t = $('#walletTxt');
+        if (state.wallet) { p.classList.remove('off'); t.textContent = shortAddr(state.wallet.addr); }
+        else { p.classList.add('off'); t.textContent = '连接钱包'; }
+        const db = $('#disconnectBtn'); if (db) db.hidden = !state.wallet;
+      }
+
+      /* ================= 首页 ================= */
+      function toggleEye() {
+        state.hideBal = !state.hideBal;
+        $('#homeBalance').textContent = state.hideBal ? '******' : '1,283.50';
+        $('#eyeIcon').innerHTML = state.hideBal
+          ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-10-8-10-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/>'
+          : '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
+      }
+      function onRecharge() { if (!state.wallet) { connectWallet(); return; } toast('请向当前收款合约地址转入 USDT 完成充值'); }
+      function onWithdraw() { if (!state.wallet) { connectWallet(); return; } toast('预售期收益暂不可提现，11 月上线后开放', 'err'); }
+      function cycleExplain() { toast('四个套餐对应保险/投资比例，上线后日静态 1% ~ 2.5%'); }
+      function guaranteeInfo() { toast('保险池与交互合约均开源丢权限，收益自动结算'); }
+      function goInvest() { goTab('invest'); }
+
+      /* ================= 套餐选择（首页/投资共用） ================= */
+      const MINUTES = [28, 37, 46, 55];
+      function renderPeriods() {
+        $('#homePeriods').innerHTML = PKGS.map((p, i) =>
+          '<button type="button" class="seg-item ' + (state.pkg === i ? 'on' : '') + '" onclick="selectPkg(' + i + ')">'
+          + '<span class="sv">' + MINUTES[i] + '分</span>'
+          + '<span class="sl">' + p.tag + '</span></button>').join('');
+        $('#invPeriods').innerHTML = PKGS.map((p, i) =>
+          '<button type="button" class="period ' + (state.pkg === i ? 'on' : '') + '" onclick="selectPkg(' + i + ')">'
+          + '<span class="pv">' + p.rate.toString().replace('.0', '') + '%</span>'
+          + '<span class="pl">' + p.tag + '</span></button>').join('');
+      }
+      function selectPkg(i) { state.pkg = i; renderPeriods(); renderDonut(); }
+      /* 环形图 */
+      function renderDonut() {
+        const p = PKGS[state.pkg], C = 2 * Math.PI * 46;
+        const invLen = C * p.int / 100, insLen = C * p.ins / 100;
+        const b = $('#donutBlue'), g = $('#donutGold');
+        b.setAttribute('stroke-dasharray', invLen + ' ' + (C - invLen));
+        b.setAttribute('stroke-dashoffset', '0');
+        g.setAttribute('stroke-dasharray', insLen + ' ' + (C - insLen));
+        g.setAttribute('stroke-dashoffset', C - invLen);
+        $('#dmInvPct').textContent = p.int + '%';
+        $('#dmInsPct').textContent = p.ins + '%';
+        $('#dmInvAmt').textContent = '投资 ' + fmt0(PREVIEW_BASE * p.int / 100) + ' USDT';
+        $('#dmInsAmt').textContent = '保险 ' + fmt0(PREVIEW_BASE * p.ins / 100) + ' USDT';
+      }
+
+      /* ================= 倒计时 ================= */
+      function isLive() { return state.demo || Date.now() >= START }
+      function toggleDemo() {
+        state.demo = !state.demo; renderCountdown();
+        toast(state.demo ? '已进入演示模式（模拟预售已开始）' : '已退出演示模式');
+      }
+      function renderCountdown() {
+        const live = isLive();
+        $('#countBanner').classList.toggle('live', live);
+        $('#countTitle').textContent = live ? '预售进行中' : '距预售开始';
+        $('#demoLink').textContent = state.demo ? '退出演示模式' : '演示模式：模拟预售已开始';
+        const cells = $('#countCells');
+        if (live) {
+          cells.innerHTML = '<div class="live-pill">PRESALE LIVE · 正在进行中</div>';
+        } else {
+          let d = START - Date.now(); if (d < 0) d = 0;
+          const dd = Math.floor(d / 864e5), hh = Math.floor(d / 36e5) % 24, mm = Math.floor(d / 6e4) % 60, ss = Math.floor(d / 1e3) % 60;
+          const c = (v, l) => '<div class="count-cell"><b>' + v + '</b><span>' + l + '</span></div>';
+          cells.innerHTML = c(String(dd).padStart(2, '0'), '天') + c(String(hh).padStart(2, '0'), '时')
+            + c(String(mm).padStart(2, '0'), '分') + c(String(ss).padStart(2, '0'), '秒');
+        }
+      }
+
+      /* ================= 收款地址轮序 ================= */
+      function renderPayers() {
+        $('#curSeq').textContent = '#' + String(state.payIdx + 1).padStart(2, '0');
+        $('#curAddr').textContent = state.payers[state.payIdx];
+        $('#curProg').style.width = Math.min(100, state.payRaised / 100000 * 100) + '%';
+        $('#curRaised').textContent = fmt0(state.payRaised) + ' / 100,000 USDT';
+        $('#seqDots').innerHTML = state.payers.map((_, i) => {
+          const c = i < state.payIdx ? 'done' : i === state.payIdx ? 'cur' : '';
+          return '<span class="seq-dot ' + c + '">' + (i + 1) + '</span>';
+        }).join('');
+      }
+      function copyCurAddr() { copyText(state.payers[state.payIdx], '收款地址已复制'); }
+
+      /* ================= 金额与测算 ================= */
+      function onAmountInput() {
+        const el = $('#amountInput'), v = el.value;
+        state.amount = v === '' ? null : Number(v);
+        let ok = true, msg = '';
+        const last = state.orders.length ? state.orders[state.orders.length - 1].amount : 0;
+        if (v !== '') {
+          if (!/^\d+$/.test(v)) { ok = false; msg = '金额须为 1 的整数倍（不含小数）'; }
+          else if (+v < 100 || +v > 10000) { ok = false; msg = '单笔金额须在 100 ~ 10,000 USDT 之间'; }
+          else if (last && +v < last) { ok = false; msg = '复投金额须 ≥ 上笔 ' + last + ' USDT'; }
+        }
+        el.classList.toggle('err', v !== '' && !ok);
+        $('#amountHint').innerHTML = (v !== '' && !ok) ? '<span style="color:#ff8a8a">' + msg + '</span>'
+          : '金额须为 1 的整数倍；可投多笔，每笔金额须大于等于上一笔。';
+        const a = state.amount || 0;
+        const set = (id, d) => $('#' + id).textContent = a ? fmt(a * 0.01 * d) + ' LP' : '—';
+        set('est1', 1); set('est7', 7); set('est15', 15); set('est30', 30);
+      }
+
+      /* ================= 下单 ================= */
+      function invest() {
+        if (!state.wallet) { toast('请先连接钱包', 'err'); return; }
+        if (!state.bound) { toast('请先完成推荐关系绑定', 'err'); goTab('team'); return; }
+        if (!isLive()) { toast('预售尚未开始，10 月 2 日 14:00 开启', 'err'); return; }
+        const el = $('#amountInput'), v = el.value;
+        const last = state.orders.length ? state.orders[state.orders.length - 1].amount : 0;
+        if (!/^\d+$/.test(v) || +v < 100 || +v > 10000 || (last && +v < last)) { onAmountInput(); toast('请检查投资金额', 'err'); return; }
+        const btn = $('#investBtn'); btn.disabled = true;
+        btn.innerHTML = '<span class="spin"></span>链上确认中…';
+        setTimeout(() => {
+          state.orders.push({ ts: Date.now(), pkg: state.pkg, amount: +v, payer: state.payers[state.payIdx], tx: genTx() });
+          state.payRaised += +v;
+          while (state.payRaised >= 100000 && state.payIdx < 29) { state.payRaised -= 100000; state.payIdx++; }
+          btn.disabled = false; btn.textContent = '确认参与预售';
+          el.value = ''; state.amount = null; onAmountInput();
+          renderPayers(); renderOrders(); renderMe(); renderTeamStats();
+          toast('预售参与成功，' + fmt(+v) + ' USDT 已上链', 'ok');
+        }, 1800);
+      }
+
+      /* ================= 订单 ================= */
+      function renderOrders() {
+        const wrap = $('#orderList');
+        if (!state.orders.length) { wrap.innerHTML = '<div class="empty">暂无预售订单，连接钱包并完成绑定后即可参与。</div>'; return; }
+        wrap.innerHTML = state.orders.map(o => {
+          const p = PKGS[o.pkg], elapsed = Date.now() - o.ts;
+          const days = Math.floor(elapsed / 864e5);
+          const next = 864e5 - (elapsed % 864e5);
+          const nh = Math.floor(next / 36e5), nm = Math.floor(next / 6e4) % 60;
+          const acc = o.amount * 0.01 * days;
+          return '<div class="order"><div class="order-top">'
+            + '<span class="amt">' + fmt0(o.amount) + ' USDT</span>'
+            + '<span class="badge badge-gold">' + p.tag + '</span>'
+            + '<span class="badge badge-blue">预售 1%/日</span>'
+            + '<span class="badge badge-gray">11 月可领 LP</span></div>'
+            + '<div class="order-grid">'
+            + '<div class="og"><div class="l">累计静态 LP</div><div class="v gold-text">' + fmt(acc) + '</div></div>'
+            + '<div class="og"><div class="l">距下次结算</div><div class="v">' + nh + ' 时 ' + nm + ' 分</div></div>'
+            + '<div class="og"><div class="l">收款地址</div><div class="v">' + shortAddr(o.payer) + '</div></div>'
+            + '<div class="og"><div class="l">下单时间</div><div class="v" style="font-size:11.5px">'
+            + new Date(o.ts).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) + '</div></div>'
+            + '</div></div>';
+        }).join('');
+      }
+
+      /* ================= 团队 / 绑定 ================= */
+      function getRefParam() {
+        let ref = new URLSearchParams(location.search).get('ref');
+        if (!ref && location.hash.includes('?')) ref = new URLSearchParams(location.hash.split('?')[1]).get('ref');
+        return ref || '';
+      }
+      function renderTeamStats() {
+        const invested = state.orders.reduce((s, o) => s + o.amount, 0);
+        $('#tmDirect').textContent = '0';
+        $('#tmValid').textContent = state.bound ? '1' : '0';
+        $('#tmVol').textContent = fmt0(invested);
+        $('#tmGen').textContent = (state.bound ? 1 : 0) + ' 代';
+      }
+      function renderBind() {
+        const box = $('#bindBox');
+        if (!state.wallet) {
+          box.innerHTML = '<div class="card"><h3><span class="bar"></span>绑定推荐关系</h3>'
+            + '<p style="font-size:12.5px;color:var(--muted);margin-bottom:14px">连接钱包后，通过邀请链接或输入推荐人地址，支付少量 BNB Gas 上链绑定，关系永久记录、不可更改。</p>'
+            + '<button class="btn btn-blue" onclick="connectWallet()">连接钱包</button></div>';
+          $('#inviteCard').hidden = true; return;
+        }
+        if (!state.bound) {
+          const ref = state.inviter || getRefParam();
+          box.innerHTML = '<div class="card"><h3><span class="bar"></span>确认推荐人并上链绑定</h3>'
+            + '<div class="kv"><span class="k">我的地址</span><span class="v mono">' + shortAddr(state.wallet.addr) + '</span></div>'
+            + '<div class="kv"><span class="k">BNB 余额</span><span class="v mono">' + state.wallet.bnb + ' BNB</span></div>'
+            + '<div class="field" style="margin-top:13px"><label>推荐人地址</label>'
+            + '<input class="input" id="inviterInput" placeholder="0x…（邀请链接自动带入）" value="' + ref + '">'
+            + '<div class="hint">绑定仅限一次、不可更改，请仔细核对。</div></div>'
+            + '<button class="btn btn-blue" onclick="doBind()">确认绑定并上链</button></div>';
+          $('#inviteCard').hidden = true; return;
+        }
+        box.innerHTML = '<div class="card"><h3><span class="bar"></span>推荐关系已绑定</h3>'
+          + '<div class="chain"><div class="chain-node"><div class="role">我的推荐人</div><div class="ad">' + shortAddr(state.inviter) + '</div></div>'
+          + '<div class="chain-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>'
+          + '<div class="chain-node me"><div class="role">我的地址</div><div class="ad">' + shortAddr(state.wallet.addr) + '</div></div></div>'
+          + '<div class="kv"><span class="k">绑定交易</span><span class="v mono">' + shortAddr(state.bindTx) + '</span></div></div>';
+        $('#inviteLink').textContent = location.origin + location.pathname + '?ref=' + state.wallet.addr;
+        $('#inviteCard').hidden = false;
+      }
+      function doBind() {
+        const v = $('#inviterInput');
+        const val = (v.value || '').trim();
+        if (!/^0x[0-9a-fA-F]{40}$/.test(val)) { v.classList.add('err'); toast('请输入正确的推荐人地址（0x + 40 位）', 'err'); return; }
+        if (val.toLowerCase() === state.wallet.addr.toLowerCase()) { v.classList.add('err'); toast('不能绑定自己的地址', 'err'); return; }
+        v.classList.remove('err'); state.inviter = val;
+        $('#bindBox').innerHTML = '<div class="card"><div class="centered">'
+          + '<div class="spin" style="width:40px;height:40px;border-width:3px;margin:0 auto 16px"></div>'
+          + '<div style="font-size:15px">正在链上确认绑定…</div>'
+          + '<div style="font-size:12px;color:var(--faint);margin-top:6px">请在钱包中确认签名并支付 Gas</div></div></div>';
+        setTimeout(() => {
+          state.bound = true; state.bindTx = genTx(); state.bindTs = Date.now();
+          renderBind(); renderMe(); renderTeamStats();
+          toast('推荐关系绑定成功', 'ok');
+        }, 2200);
+      }
+      function copyInvite() { copyText($('#inviteLink').textContent, '邀请链接已复制'); }
+      function savePoster() { toast('邀请海报已生成（原型演示）'); }
+
+      /* ================= 我的 ================= */
+      function renderMe() {
+        $('#meAddr').textContent = state.wallet ? shortAddr(state.wallet.addr) : '未连接钱包';
+        const bb = $('#meBindBadge');
+        if (state.bound) { bb.className = 'badge badge-gold'; bb.textContent = '已绑定'; }
+        else { bb.className = 'badge badge-gray'; bb.textContent = '未绑定'; }
+        const invested = state.orders.reduce((s, o) => s + o.amount, 0);
+        $('#meInvested').textContent = fmt0(invested);
+        $('#meOrders').textContent = state.orders.length + ' 笔';
+        $('#meBnb').textContent = state.wallet ? state.wallet.bnb + ' BNB' : '--';
+        $('#meDirect').textContent = '0';
+        $('#meGen').textContent = (state.bound ? 1 : 0) + ' 代';
+      }
+      function showPayer() { toast('当前收款：' + state.payers[state.payIdx]); }
+      function redeemInfo() { toast('保险池剩余资产可随时赎回，赎回后订单结束、业绩消失'); }
+      function networkInfo() { toast('当前网络：BNB Smart Chain（BEP20）'); }
+      function helpInfo() { toast('请联系你的推荐人获取帮助'); }
+      function aboutInfo() { toast('AKN 源律机制 · 源于代码，律于共识'); }
+
+      /* ================= 初始化 ================= */
+      $('#investNote').innerHTML = '资金分配：保险池部分进入保险池地址（开源丢权限，可随时在 DApp / 链上赎回，赎回后该笔订单结束、业绩消失）；交互合约部分 80% 中一半买币与剩余油组 LP 转黑洞，20% 至运营地址 USDT。';
+      $('#rateNote').innerHTML = '预售期间（10/2 起至 11 月正式上线）不分套餐，每 24 小时统一按 <span class="gold-text">1%</span> 结算 LP，暂不可领取；正式上线后恢复套餐日静态收益（1% / 1.5% / 2% / 2.5%）并开放领取，领取静态时同步向上结算代数奖、团队奖与小区分红。';
+      renderPeriods(); renderDonut(); renderCountdown(); renderPayers();
+      onAmountInput(); renderOrders(); renderWallet(); renderBind(); renderMe(); renderTeamStats();
+      syncRoute();
+      setInterval(() => { renderCountdown(); if (state.orders.length) renderOrders(); }, 1000);
+    </script>
+  </div>
+</body>
+
+</html>
