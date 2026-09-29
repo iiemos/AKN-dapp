@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useI18n } from "../i18n/locale";
+
+const NOTICE_INTERVAL_MS = 4000;
 
 const NOTICES = [
   ["AKN 预售已在 BNB Smart Chain 开启", "AKN presale is live on BNB Smart Chain"],
@@ -89,6 +91,13 @@ export default function HomePage() {
   const { t } = useI18n();
   const [noticeIndex, setNoticeIndex] = useState(0);
   const notice = NOTICES[noticeIndex];
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNoticeIndex((current) => (current + 1) % NOTICES.length);
+    }, NOTICE_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [noticeIndex]);
 
   function moveNotice(step) {
     setNoticeIndex((current) => (current + step + NOTICES.length) % NOTICES.length);
