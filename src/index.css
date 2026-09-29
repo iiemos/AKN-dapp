@@ -1466,3 +1466,78 @@
   opacity: .72;
   cursor: default
 }
+
+.recharge-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 96px;
+  background: rgba(2, 8, 6, .78);
+}
+
+.recharge-dialog {
+  position: relative;
+  width: min(420px, 100%);
+  padding: 22px 18px 18px;
+  border: 1px solid var(--line-brand);
+  border-radius: 18px;
+  background:
+    radial-gradient(280px 140px at 50% 0%, rgba(18, 196, 92, .16), transparent 70%),
+    linear-gradient(180deg, #0C2418, #07140E);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55);
+}
+
+.recharge-dialog h3 {
+  margin: 0 28px 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .4px;
+}
+
+.recharge-sub {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.recharge-x {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .04);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.recharge-qr {
+  display: block;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto 14px;
+  padding: 10px;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.recharge-addr {
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .28);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-all;
+  user-select: all;
+}

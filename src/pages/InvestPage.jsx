@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
 import { useNavigate } from "react-router-dom";
 import { parseUnits } from "viem";
 import ring from "../../assets/ring.png";
@@ -55,6 +56,7 @@ export default function InvestPage() {
   const [hidden, setHidden] = useState(false);
   const [amount, setAmount] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [recharge, setRecharge] = useState(null);
   const status = statusQuery.data;
   const decimals = status?.decimals;
   const orders = ordersQuery.data || [];
@@ -140,8 +142,23 @@ export default function InvestPage() {
       toast(getActionErrorMessage(receiverQuery.error) || "当前收款地址尚未读取", "err");
       return;
     }
-    const copied = await copyText(receiver.address);
-    toast(copied ? `请向当前收款地址转入 USDT：${receiver.address}` : "请向当前收款合约地址转入 USDT 完成充值");
+    try {
+      const qr = await QRCode.toDataURL(receiver.address, {
+        width: 480,
+        margin: 1,
+        errorCorrectionLevel: "M",
+        color: { dark: "#062014", light: "#FFFFFF" },
+      });
+      setRecharge({ address: receiver.address, qr });
+    } catch (error) {
+      toast(getActionErrorMessage(error), "err");
+    }
+  }
+
+  async function onCopyRechargeAddress() {
+    if (!recharge?.address) return;
+    const copied = await copyText(recharge.address);
+    toast(copied ? "收款地址已复制" : "复制失败", copied ? "ok" : "err");
   }
 
   async function onWithdraw() {
@@ -402,6 +419,23 @@ export default function InvestPage() {
           );
         })}
       </div>
+
+      {recharge ? (
+        <div className="recharge-mask" onClick={() => setRecharge(null)}>
+          <div className="recharge-dialog" role="dialog" aria-modal="true" aria-labelledby="recharge-title" onClick={(event) => event.stopPropagation()}>
+            <button className="recharge-x" type="button" aria-label="关闭" onClick={() => setRecharge(null)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+            <h3 id="recharge-title">充值 USDT</h3>
+            <p className="recharge-sub">扫描二维码，或复制下方地址转入 BEP20 USDT</p>
+            <img className="recharge-qr" src={recharge.qr} alt="收款地址二维码" />
+            <div className="recharge-addr mono">{recharge.address}</div>
+            <button className="btn btn-blue" type="button" onClick={onCopyRechargeAddress}>复制地址</button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
