@@ -1,4 +1,5 @@
 :root {
+      color-scheme: dark;
       --bg: #040C08;
       --bg2: #07140E;
       --gold: #E4BC4E;
@@ -26,6 +27,7 @@
 
     html,
     body {
+      color-scheme: dark;
       background: #020806
     }
 
@@ -1748,10 +1750,11 @@
   line-height: 1.25;
   font-weight: 700;
   letter-spacing: .5px;
-  background: linear-gradient(180deg, #fff, rgba(232, 246, 238, .62));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
 }
 
 .home-hero p {
@@ -2003,4 +2006,29 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.order-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 4px 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.order-pager button {
+  min-width: 72px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-brand);
+  background: rgba(18, 196, 92, .1);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.order-pager button:disabled {
+  opacity: .4;
+  cursor: default;
 }

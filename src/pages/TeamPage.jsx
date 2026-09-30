@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { isAddress } from "viem";
 import { getContractConfigMissingKeys, isContractConfigReady } from "../config/aknRuntime";
-import { useInvalidateAkn, useNetworkProfile, useTopMember } from "../hooks/useAknReads";
+import { useInvalidateAkn, useNetworkProfile } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
-import { isUsableAddress, registerMember, ZERO_ADDRESS } from "../services/aknContracts";
+import { isUsableAddress, registerMember } from "../services/aknContracts";
 import { useReferral } from "../state/appState";
 import { copyText } from "../utils/clipboard";
 import { shortAddress } from "../utils/formatters";
@@ -22,7 +22,6 @@ export default function TeamPage() {
   const wallet = useWalletConnector();
   const preset = useReferral();
   const profileQuery = useNetworkProfile(wallet.currentAddress);
-  const topMemberQuery = useTopMember();
   const invalidate = useInvalidateAkn();
   const [inviter, setInviter] = useState(preset);
   const [invalid, setInvalid] = useState(false);
@@ -33,15 +32,9 @@ export default function TeamPage() {
     : "";
 
   useEffect(() => {
-    if (preset) {
-      setInviter(preset);
-      return;
-    }
-    const topMember = topMemberQuery.data;
-    if (!isAddress(topMember) || topMember.toLowerCase() === ZERO_ADDRESS) return;
-    if (wallet.currentAddress && topMember.toLowerCase() === wallet.currentAddress.toLowerCase()) return;
-    setInviter((current) => current || topMember);
-  }, [preset, topMemberQuery.data, wallet.currentAddress]);
+    if (!preset) return;
+    setInviter(preset);
+  }, [preset]);
 
   async function onConnect() {
     try {
@@ -127,9 +120,8 @@ export default function TeamPage() {
             <div className="kv"><span className="k">{t("我的地址", "My address")}</span><span className="v mono">{wallet.shortAddress}</span></div>
             <div className="field" style={{ marginTop: 13 }}>
               <label>{t("推荐人地址", "Referrer address")}</label>
-              <input className={`input${invalid ? " err" : ""}`} placeholder={t("0x…（邀请链接自动带入，否则使用网体 Top）", "0x... (invite link, otherwise network top)")} value={inviter} onChange={(event) => { setInviter(event.target.value); setInvalid(false); }} />
+              <input className={`input${invalid ? " err" : ""}`} placeholder={t("0x…（仅邀请链接会自动带入）", "0x... (filled only from an invite link)")} value={inviter} onChange={(event) => { setInviter(event.target.value); setInvalid(false); }} />
               <div className="hint">{t("注册仅限一次、不可更改，请仔细核对。确认后支付 Gas 完成注册。", "Registration can only be done once and cannot be changed. Check the address, then pay gas.")}</div>
-              {topMemberQuery.error ? <div className="hint" style={{ color: "#ff8a8a" }}>{getActionErrorMessage(topMemberQuery.error)}</div> : null}
             </div>
             <button className="btn btn-blue" type="button" onClick={onRegister}>{t("确认注册并上链", "Register on-chain")}</button>
           </div>

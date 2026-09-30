@@ -11,6 +11,12 @@ const TESTNET_CONTRACTS = {
   usdt: "0x4E565d40631B21F38D1178953DA11cfBE0B770E3",
 };
 
+const MAINNET_CONTRACTS = {
+  presale: "",
+  network: "0xD7Ed315b16e990d03C2584Ebe73e3A76629BD238",
+  usdt: "0x55d398326f99059fF775485246999027B3197955",
+};
+
 function normalizeAddress(value) {
   if (!value || typeof value !== "string") return "";
   return value.trim();
@@ -20,16 +26,17 @@ function resolveAddress(envValue, documentedAddress) {
   return normalizeAddress(envValue) || documentedAddress;
 }
 
-const configuredChainId = Number(import.meta.env.VITE_AKN_CHAIN_ID || bscTestnet.id);
+const configuredChainId = Number(import.meta.env.VITE_AKN_CHAIN_ID || bsc.id);
 
-export const AKN_CHAIN = SUPPORTED_CHAINS[configuredChainId] ?? bscTestnet;
+export const AKN_CHAIN = SUPPORTED_CHAINS[configuredChainId] ?? bsc;
 export const AKN_CHAIN_ID = AKN_CHAIN.id;
 
-// Presale.USDT() is the token used for allowance and balance. This address is the documented testnet token.
+const defaultContracts = AKN_CHAIN_ID === bscTestnet.id ? TESTNET_CONTRACTS : MAINNET_CONTRACTS;
+
 export const AKN_CONTRACTS = {
-  presale: resolveAddress(import.meta.env.VITE_AKN_PRESALE_ADDRESS, TESTNET_CONTRACTS.presale),
-  network: resolveAddress(import.meta.env.VITE_AKN_NETWORK_ADDRESS, TESTNET_CONTRACTS.network),
-  usdt: resolveAddress(import.meta.env.VITE_AKN_USDT_ADDRESS, TESTNET_CONTRACTS.usdt),
+  presale: resolveAddress(import.meta.env.VITE_AKN_PRESALE_ADDRESS, defaultContracts.presale),
+  network: resolveAddress(import.meta.env.VITE_AKN_NETWORK_ADDRESS, defaultContracts.network),
+  usdt: resolveAddress(import.meta.env.VITE_AKN_USDT_ADDRESS, defaultContracts.usdt),
 };
 
 const CONTRACT_ENV_KEYS = {

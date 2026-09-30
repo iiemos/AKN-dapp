@@ -8,7 +8,6 @@ import {
   readPresaleStatus,
   readReceiverState,
   readTokenBalance,
-  readTopMember,
   readTotalInvestment,
   readUserOrders,
 } from "../services/aknContracts";
@@ -79,13 +78,6 @@ export function useNetworkProfile(address) {
   });
 }
 
-export function useTopMember() {
-  return useQuery({
-    queryKey: ["akn", "top-member"],
-    enabled: isContractConfigReady(["network"]),
-    queryFn: readTopMember,
-  });
-}
 
 export function useInvalidateAkn() {
   const client = useQueryClient();

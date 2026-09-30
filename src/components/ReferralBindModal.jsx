@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { isAddress } from "viem";
-import { useInvalidateAkn, useTopMember } from "../hooks/useAknReads";
+import { useInvalidateAkn } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
 import { useI18n } from "../i18n/locale";
-import { registerMember, ZERO_ADDRESS } from "../services/aknContracts";
+import { registerMember } from "../services/aknContracts";
 import { useReferral } from "../state/appState";
 import { getActionErrorMessage } from "../utils/walletErrors";
 import { useToast } from "./Toast";
@@ -13,22 +13,15 @@ export default function ReferralBindModal({ onClose }) {
   const toast = useToast();
   const wallet = useWalletConnector();
   const preset = useReferral();
-  const topMemberQuery = useTopMember();
   const invalidate = useInvalidateAkn();
   const [inviter, setInviter] = useState(preset);
   const [invalid, setInvalid] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (preset) {
-      setInviter(preset);
-      return;
-    }
-    const topMember = topMemberQuery.data;
-    if (!isAddress(topMember) || topMember.toLowerCase() === ZERO_ADDRESS) return;
-    if (wallet.currentAddress && topMember.toLowerCase() === wallet.currentAddress.toLowerCase()) return;
-    setInviter((current) => current || topMember);
-  }, [preset, topMemberQuery.data, wallet.currentAddress]);
+    if (!preset) return;
+    setInviter(preset);
+  }, [preset]);
 
   async function onBind() {
     const value = inviter.trim();
@@ -49,7 +42,6 @@ export default function ReferralBindModal({ onClose }) {
       await registerMember(wallet.currentAddress, value);
       await invalidate();
       toast(t("邀请人绑定成功", "Referrer bound"), "ok");
-      onClose();
     } catch (error) {
       toast(getActionErrorMessage(error), "err");
     } finally {

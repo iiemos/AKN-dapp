@@ -223,10 +223,6 @@ export async function readNetworkProfile(account) {
   };
 }
 
-export async function readTopMember() {
-  const network = assertContractAddress("network");
-  return read({ address: network, abi: networkAbi, functionName: "topMember" });
-}
 
 export async function registerMember(account, referrer) {
   const network = assertContractAddress("network");

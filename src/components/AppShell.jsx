@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useNetworkProfile } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
@@ -54,24 +54,53 @@ function TabIcon({ name }) {
 
 export default function AppShell() {
   const location = useLocation();
+  const navigate = useNavigate();
   const toast = useToast();
   const wallet = useWalletConnector();
   const { locale, setLocale, t } = useI18n();
   const profileQuery = useNetworkProfile(wallet.currentAddress);
   const [langOpen, setLangOpen] = useState(false);
-  const [bindDismissed, setBindDismissed] = useState("");
+  const [bindClosed, setBindClosed] = useState(false);
   const langRef = useRef(null);
+  const bindReopenTimer = useRef(0);
+  const allowedPathRef = useRef(location.pathname === "/invest" ? "/" : location.pathname);
+  const investBlockedRef = useRef(false);
   const bindOpen = Boolean(
     wallet.isConnected
     && wallet.currentAddress
     && profileQuery.data
     && !profileQuery.data.registered
-    && bindDismissed !== wallet.currentAddress,
+    && !bindClosed,
   );
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (location.pathname !== "/invest") {
+      allowedPathRef.current = location.pathname;
+      investBlockedRef.current = false;
+      return;
+    }
+    if (investBlockedRef.current) return;
+    investBlockedRef.current = true;
+    toast(t("暂未开放", "Not open yet"));
+    navigate(allowedPathRef.current, { replace: true });
+  }, [location.pathname, navigate, t, toast]);
+
+  useEffect(() => () => window.clearTimeout(bindReopenTimer.current), []);
+
+  useEffect(() => {
+    window.clearTimeout(bindReopenTimer.current);
+    setBindClosed(false);
+  }, [wallet.currentAddress]);
+
+  function dismissBindPrompt() {
+    window.clearTimeout(bindReopenTimer.current);
+    setBindClosed(true);
+    bindReopenTimer.current = window.setTimeout(() => setBindClosed(false), 1000);
+  }
 
   useEffect(() => {
     if (!langOpen) return undefined;
@@ -146,16 +175,26 @@ export default function AppShell() {
           </div>
         </div>
       </header>
-      <Outlet />
+      {location.pathname === "/invest" ? null : <Outlet />}
       <nav className="tabbar">
         {TABS.map((tab) => (
-          <NavLink key={tab.to} to={tab.to} end={tab.to === "/"} className={({ isActive }) => `tab${isActive ? " on" : ""}`}>
+          <NavLink
+            key={tab.to}
+            to={tab.to}
+            end={tab.to === "/"}
+            className={({ isActive }) => `tab${isActive ? " on" : ""}`}
+            onClick={(event) => {
+              if (tab.to !== "/invest") return;
+              event.preventDefault();
+              toast(t("暂未开放", "Not open yet"));
+            }}
+          >
             <TabIcon name={tab.icon} />
             {t(tab.zh, tab.en)}
           </NavLink>
         ))}
       </nav>
-      {bindOpen ? <ReferralBindModal onClose={() => setBindDismissed(wallet.currentAddress)} /> : null}
+      {bindOpen ? <ReferralBindModal onClose={dismissBindPrompt} /> : null}
     </div>
   );
 }

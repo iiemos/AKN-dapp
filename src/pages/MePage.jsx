@@ -1,30 +1,55 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import icon from "../../assets/icon.png";
 import { AKN_CHAIN } from "../config/aknRuntime";
-import { useNativeBalance, useNetworkProfile, usePresaleStatus, useReceiverState, useTotalInvestment, useUserOrders } from "../hooks/useAknReads";
+import { PACKAGES } from "../data/packages";
+import { useNativeBalance, useNetworkProfile, usePresaleStatus, useTotalInvestment, useUserOrders } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
 import { formatToken, formatTokenInteger } from "../utils/formatters";
 import { getActionErrorMessage } from "../utils/walletErrors";
-import { useI18n } from "../i18n/locale";
+import { PACKAGE_EN, useI18n } from "../i18n/locale";
+
+const ORDER_PAGE_SIZE = 10;
+
+function useNow(intervalMs = 1000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), intervalMs);
+    return () => window.clearInterval(timer);
+  }, [intervalMs]);
+  return now;
+}
+
+function formatDistance(targetSeconds, nowMs, t) {
+  if (!targetSeconds) return "--";
+  const delta = Math.max(0, targetSeconds * 1000 - nowMs);
+  const hours = Math.floor(delta / 3600000);
+  const minutes = Math.floor(delta / 60000) % 60;
+  return t(`${hours} 时 ${minutes} 分`, `${hours}h ${minutes}m`);
+}
 
 export default function MePage() {
-  const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const now = useNow();
   const wallet = useWalletConnector();
+  const [page, setPage] = useState(0);
   const ordersQuery = useUserOrders(wallet.currentAddress);
   const profileQuery = useNetworkProfile(wallet.currentAddress);
   const nativeQuery = useNativeBalance(wallet.currentAddress);
   const statusQuery = usePresaleStatus();
   const investedQuery = useTotalInvestment(wallet.currentAddress);
-  const receiverQuery = useReceiverState();
   const decimals = statusQuery.data?.decimals;
-  const orders = ordersQuery.data;
+  const orders = ordersQuery.data || [];
   const profile = profileQuery.data;
+  const pageCount = Math.max(1, Math.ceil(orders.length / ORDER_PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const visibleOrders = orders.slice(currentPage * ORDER_PAGE_SIZE, currentPage * ORDER_PAGE_SIZE + ORDER_PAGE_SIZE);
   const investedText = wallet.isConnected && investedQuery.data !== undefined && decimals !== undefined
     ? formatTokenInteger(investedQuery.data, decimals)
     : "--";
-  const currentReceiver = receiverQuery.data?.receivers?.[receiverQuery.data.index];
-  const receiverCaption = currentReceiver?.address || "--";
+
+  useEffect(() => {
+    setPage(0);
+  }, [wallet.currentAddress]);
 
   return (
     <section className="view active">
@@ -48,46 +73,48 @@ export default function MePage() {
 
       <div className="mini-grid">
         <div className="mini"><div className="l">{t("累计投入 (USDT)", "Total invested (USDT)")}</div><div className="v">{investedText}</div></div>
-        <div className="mini"><div className="l">{t("预售订单", "Presale orders")}</div><div className="v">{orders ? t(`${orders.length} 笔`, `${orders.length} orders`) : "--"}</div></div>
+        <div className="mini"><div className="l">{t("预售订单", "Presale orders")}</div><div className="v">{ordersQuery.data ? t(`${orders.length} 笔`, `${orders.length} orders`) : "--"}</div></div>
         <div className="mini"><div className="l">{t("直推人数", "Direct referrals")}</div><div className="v">{profile ? profile.directCount : "--"}</div></div>
         <div className="mini"><div className="l">{t("可享代数", "Reward levels")}</div><div className="v">--</div></div>
       </div>
-      {profileQuery.error || statusQuery.error || investedQuery.error || ordersQuery.error || receiverQuery.error ? (
-        <div className="empty">{getActionErrorMessage(profileQuery.error || statusQuery.error || investedQuery.error || ordersQuery.error || receiverQuery.error)}</div>
+      {profileQuery.error || statusQuery.error || investedQuery.error ? (
+        <div className="empty">{getActionErrorMessage(profileQuery.error || statusQuery.error || investedQuery.error)}</div>
       ) : null}
 
-      <div className="card">
-        <h3><span className="bar" />{t("订单与资产", "Orders and assets")}</h3>
-        <div className="lrow" onClick={() => navigate("/invest")}>
-          <div className="lrow-txt"><div className="lrow-label">{t("我的订单", "My orders")}</div><div className="lrow-sub">{t("查看预售订单与收款进度", "View presale orders and deposit progress")}</div></div>
-          <span className="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 10h18M8 2v4M16 2v4" /></svg></span>
-        </div>
-        <div className="lrow">
-          <div className="lrow-txt"><div className="lrow-label">{t("当前收款地址", "Current deposit address")}</div><div className="lrow-sub" style={{ wordBreak: "break-all" }}>{receiverCaption}</div></div>
-          <span className="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg></span>
-        </div>
-        <div className="lrow">
-          <div className="lrow-txt"><div className="lrow-label">{t("赎回说明", "Redemption")}</div><div className="lrow-sub">{t("保险池可随时赎回，赎回后订单结束", "The insurance pool can be redeemed at any time. Redeeming ends the order.")}</div></div>
-          <span className="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" /></svg></span>
-        </div>
+      <div className="sec-title"><span className="bar" />{t("我的订单", "My orders")}</div>
+      <div>
+        {ordersQuery.error ? <div className="empty">{getActionErrorMessage(ordersQuery.error)}</div>
+        : !wallet.isConnected ? <div className="empty">{t("连接钱包后查看预售订单。", "Connect a wallet to view presale orders.")}</div>
+        : !orders.length ? <div className="empty">{t("暂无预售订单。", "No presale orders yet.")}</div>
+        : (
+          <>
+            {visibleOrders.map((order) => {
+              const item = PACKAGES[order.packageId - 1];
+              return (
+                <div className="order" key={String(order.orderId)}>
+                  <div className="order-top">
+                    <span className="amt">{decimals === undefined ? "--" : `${formatTokenInteger(order.principal, decimals)} USDT`}</span>
+                    <span className="badge badge-gold">{item ? t(item.tag, PACKAGE_EN[item.tag] || item.tag) : t(`套餐 ${order.packageId}`, `Package ${order.packageId}`)}</span>
+                    <span className="badge badge-blue">{t("预售 1%/日", "Presale 1%/day")}</span>
+                  </div>
+                  <div className="order-grid">
+                    <div className="og"><div className="l">{t("累计收益", "Accrued")}</div><div className="v gold-text">{decimals === undefined ? "--" : formatToken(order.accruedReward, decimals)}</div></div>
+                    <div className="og"><div className="l">{t("距下次结算", "Next settlement")}</div><div className="v">{formatDistance(order.nextAccrualAt, now, t)}</div></div>
+                    <div className="og"><div className="l">{t("下单时间", "Time")}</div><div className="v" style={{ fontSize: 11.5 }}>{new Date(order.createdAt * 1000).toLocaleString(locale === "en" ? "en-US" : "zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}</div></div>
+                  </div>
+                </div>
+              );
+            })}
+            {orders.length > ORDER_PAGE_SIZE ? (
+              <div className="order-pager">
+                <button type="button" disabled={currentPage === 0} onClick={() => setPage(currentPage - 1)}>{t("上一页", "Prev")}</button>
+                <span>{currentPage + 1}/{pageCount}</span>
+                <button type="button" disabled={currentPage >= pageCount - 1} onClick={() => setPage(currentPage + 1)}>{t("下一页", "Next")}</button>
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
-
-      <div className="card">
-        <h3><span className="bar" />{t("网络与支持", "Network and support")}</h3>
-        <div className="lrow">
-          <div className="lrow-txt"><div className="lrow-label">{t("网络设置", "Network")}</div><div className="lrow-sub">{AKN_CHAIN.name} · BEP20</div></div>
-          <span className="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" /></svg></span>
-        </div>
-        <div className="lrow">
-          <div className="lrow-txt"><div className="lrow-label">{t("帮助中心", "Help")}</div><div className="lrow-sub">xxxx@xxxx.com</div></div>
-          <span className="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="12" cy="12" r="10" /><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></svg></span>
-        </div>
-        <div className="lrow">
-          <div className="lrow-txt"><div className="lrow-label">{t("关于 AKN", "About AKN")}</div><div className="lrow-sub">{t("源律机制 · 源于代码，律于共识", "AKN · Code is the source. Consensus is the rule.")}</div></div>
-          <span className="lrow-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg></span>
-        </div>
-      </div>
-
     </section>
   );
 }
