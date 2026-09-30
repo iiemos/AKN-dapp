@@ -1028,6 +1028,9 @@
     }
 
     /* ===== KV / 列表 ===== */
+    .field .input{
+      font-size: 12px;
+    }
     .kv {
       display: flex;
       justify-content: space-between;
@@ -1634,6 +1637,10 @@
   font-size: 22px;
   font-weight: 700;
   line-height: 1.25;
+}
+
+.bind-dialog .input {
+  font-size: 11px;
 }
 
 .bind-x {
