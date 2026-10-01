@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import logo from "../../assets/logo.png";
 import { useI18n } from "../i18n/locale";
@@ -87,6 +88,7 @@ function FeatureIcon({ name }) {
 }
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const toast = useToast();
   const { t } = useI18n();
   const [noticeIndex, setNoticeIndex] = useState(0);
@@ -123,7 +125,10 @@ export default function HomePage() {
       <div className="home-hero">
         <h1>{t("释放数字收益的力量", "Unlock the power of digital yield")}</h1>
         <p>{t("体验 AKN 预售与网体协议，运行在 BNB Smart Chain。合约开源、权限丢弃、去中心化。", "AKN is a presale and referral protocol on BNB Smart Chain. Open-source contracts, renounced permissions, and decentralized settlement.")}</p>
-        <button className="btn btn-blue" type="button" onClick={() => toast(t("暂未开放", "Not open yet"))}>
+        <button className="btn btn-blue" type="button" onClick={() => {
+          // toast(t("暂未开放", "Not open yet"));
+          navigate("/invest");
+        }}>
           {t("前往投资", "Start investing")}
         </button>
       </div>
@@ -174,7 +179,10 @@ export default function HomePage() {
       <section className="home-ready">
         <h2>{t("准备好最大化您的资产了吗？", "Ready to maximize your assets?")}</h2>
         <p>{t("注册推荐关系后，按套餐参与 AKN 预售。资金进入保险池与交互合约，收益由合约结算。", "Bind a referrer, then join the AKN presale. Funds go to the insurance pool and the interaction contract, and rewards are settled by contract.")}</p>
-        <button className="home-ready-btn" type="button" onClick={() => toast(t("暂未开放", "Not open yet"))}>
+        <button className="home-ready-btn" type="button" onClick={() => {
+          // toast(t("暂未开放", "Not open yet"));
+          navigate("/invest");
+        }}>
           {t("前往投资", "Connect and invest")}
         </button>
       </section>

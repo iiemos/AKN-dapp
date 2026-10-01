@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+// import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import { useNetworkProfile } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
@@ -54,7 +55,6 @@ function TabIcon({ name }) {
 
 export default function AppShell() {
   const location = useLocation();
-  const navigate = useNavigate();
   const toast = useToast();
   const wallet = useWalletConnector();
   const { locale, setLocale, t } = useI18n();
@@ -63,8 +63,9 @@ export default function AppShell() {
   const [bindClosed, setBindClosed] = useState(false);
   const langRef = useRef(null);
   const bindReopenTimer = useRef(0);
-  const allowedPathRef = useRef(location.pathname === "/invest" ? "/" : location.pathname);
-  const investBlockedRef = useRef(false);
+  // const navigate = useNavigate();
+  // const allowedPathRef = useRef(location.pathname === "/invest" ? "/" : location.pathname);
+  // const investBlockedRef = useRef(false);
   const bindOpen = Boolean(
     wallet.isConnected
     && wallet.currentAddress
@@ -77,17 +78,17 @@ export default function AppShell() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (location.pathname !== "/invest") {
-      allowedPathRef.current = location.pathname;
-      investBlockedRef.current = false;
-      return;
-    }
-    if (investBlockedRef.current) return;
-    investBlockedRef.current = true;
-    toast(t("暂未开放", "Not open yet"));
-    navigate(allowedPathRef.current, { replace: true });
-  }, [location.pathname, navigate, t, toast]);
+  // useEffect(() => {
+  //   if (location.pathname !== "/invest") {
+  //     allowedPathRef.current = location.pathname;
+  //     investBlockedRef.current = false;
+  //     return;
+  //   }
+  //   if (investBlockedRef.current) return;
+  //   investBlockedRef.current = true;
+  //   toast(t("暂未开放", "Not open yet"));
+  //   navigate(allowedPathRef.current, { replace: true });
+  // }, [location.pathname, navigate, t, toast]);
 
   useEffect(() => () => window.clearTimeout(bindReopenTimer.current), []);
 
@@ -175,7 +176,15 @@ export default function AppShell() {
           </div>
         </div>
       </header>
-      {location.pathname === "/invest" ? null : <Outlet />}
+      <Outlet />
+      {/* {location.pathname === "/invest" ? null : <Outlet />} */}
+      {/* Invest entry block is temporarily disabled.
+          onClick={(event) => {
+            if (tab.to !== "/invest") return;
+            event.preventDefault();
+            toast(t("暂未开放", "Not open yet"));
+          }}
+      */}
       <nav className="tabbar">
         {TABS.map((tab) => (
           <NavLink
@@ -183,11 +192,6 @@ export default function AppShell() {
             to={tab.to}
             end={tab.to === "/"}
             className={({ isActive }) => `tab${isActive ? " on" : ""}`}
-            onClick={(event) => {
-              if (tab.to !== "/invest") return;
-              event.preventDefault();
-              toast(t("暂未开放", "Not open yet"));
-            }}
           >
             <TabIcon name={tab.icon} />
             {t(tab.zh, tab.en)}
