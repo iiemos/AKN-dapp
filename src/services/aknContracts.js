@@ -1,9 +1,9 @@
 import { isAddress } from "viem";
-import { getBalance, readContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
+import { getBalance, readContract, readContracts, waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import presaleAbi from "../../对接文档/Presale.json";
 import networkAbi from "../../对接文档/Network.json";
 import usdtAbi from "../../对接文档/MockUSDT.json";
-import { AKN_CHAIN_ID, assertContractAddress } from "../config/aknRuntime";
+import { AKN_CHAIN_ID, assertContractAddress, isContractConfigReady } from "../config/aknRuntime";
 import { wagmiConfig } from "../web3/wagmiConfig";
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -204,6 +204,76 @@ export async function investPresale(account, packageId, amount) {
     functionName: "invest",
     args: [amount, packageId],
   });
+}
+
+
+async function attachPersonalInvestments(members) {
+  if (!members.length || !isContractConfigReady(["presale"])) {
+    return members.map((address) => ({ address, personalInvestment: null }));
+  }
+  const presale = assertContractAddress("presale");
+  const investments = await readContracts(wagmiConfig, {
+    allowFailure: false,
+    contracts: members.map((member) => ({
+      address: presale,
+      abi: presaleAbi,
+      functionName: "totalInvestmentOf",
+      args: [member],
+      chainId: AKN_CHAIN_ID,
+    })),
+  });
+  return members.map((address, index) => ({
+    address,
+    personalInvestment: investments[index],
+  }));
+}
+
+export async function readDirectMemberPage(account, mode, page, pageSize) {
+  const network = assertContractAddress("network");
+  if (mode === "active") return readActiveDirectMembers(network, account, page, pageSize);
+  const members = await read({
+    address: network,
+    abi: networkAbi,
+    functionName: "directMembers",
+    args: [account, BigInt(page * pageSize), BigInt(pageSize)],
+  });
+  return attachPersonalInvestments(members);
+}
+
+async function readActiveDirectMembers(network, account, page, pageSize) {
+  const [directCount, scanLimit] = await Promise.all([
+    read({ address: network, abi: networkAbi, functionName: "directCount", args: [account] }),
+    read({ address: network, abi: networkAbi, functionName: "MAX_PAGE_SIZE" }),
+  ]);
+  const total = Number(directCount);
+  const limit = Number(scanLimit);
+  const needed = (page + 1) * pageSize;
+  const matched = [];
+  let offset = 0;
+  while (matched.length < needed && offset < total) {
+    const batch = await read({
+      address: network,
+      abi: networkAbi,
+      functionName: "directMembers",
+      args: [account, BigInt(offset), BigInt(limit)],
+    });
+    if (!batch.length) break;
+    const activeFlags = await readContracts(wagmiConfig, {
+      allowFailure: false,
+      contracts: batch.map((member) => ({
+        address: network,
+        abi: networkAbi,
+        functionName: "isActive",
+        args: [member],
+        chainId: AKN_CHAIN_ID,
+      })),
+    });
+    batch.forEach((member, index) => {
+      if (activeFlags[index]) matched.push(member);
+    });
+    offset += batch.length;
+  }
+  return attachPersonalInvestments(matched.slice(page * pageSize, needed));
 }
 
 export async function readNetworkProfile(account) {

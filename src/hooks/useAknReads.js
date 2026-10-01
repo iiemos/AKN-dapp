@@ -8,6 +8,7 @@ import {
   readPresaleStatus,
   readReceiverState,
   readTokenBalance,
+  readDirectMemberPage,
   readTotalInvestment,
   readUserOrders,
 } from "../services/aknContracts";
@@ -75,6 +76,14 @@ export function useNetworkProfile(address) {
     queryKey: ["akn", "network", address],
     enabled: Boolean(address) && isContractConfigReady(["network"]),
     queryFn: () => readNetworkProfile(address),
+  });
+}
+
+export function useDirectMemberPage(address, mode, page, pageSize) {
+  return useQuery({
+    queryKey: ["akn", "directs", address, mode, page, pageSize],
+    enabled: Boolean(address) && isContractConfigReady(["network"]),
+    queryFn: () => readDirectMemberPage(address, mode, page, pageSize),
   });
 }
 

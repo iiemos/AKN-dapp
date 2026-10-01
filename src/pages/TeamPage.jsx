@@ -1,19 +1,27 @@
 import { useEffect, useState } from "react";
 import { isAddress } from "viem";
 import { getContractConfigMissingKeys, isContractConfigReady } from "../config/aknRuntime";
-import { useInvalidateAkn, useNetworkProfile } from "../hooks/useAknReads";
+import { useDirectMemberPage, useInvalidateAkn, useNetworkProfile, usePresaleStatus, useTotalInvestment } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
 import { isUsableAddress, registerMember } from "../services/aknContracts";
 import { useReferral } from "../state/appState";
 import { copyText } from "../utils/clipboard";
-import { shortAddress } from "../utils/formatters";
+import { formatTokenInteger, shortAddress } from "../utils/formatters";
 import { getActionErrorMessage } from "../utils/walletErrors";
 import { useToast } from "../components/Toast";
 import { useI18n } from "../i18n/locale";
 
+const DIRECT_PAGE_SIZE = 10;
+
 function formatReferrer(address, t) {
   if (!isUsableAddress(address)) return t("无上级", "No referrer");
   return shortAddress(address);
+}
+
+function formatInvestment(value, decimals, pending) {
+  if (pending) return "…";
+  if (value == null || decimals == null) return "--";
+  return formatTokenInteger(value, decimals);
 }
 
 export default function TeamPage() {
@@ -22,11 +30,32 @@ export default function TeamPage() {
   const wallet = useWalletConnector();
   const preset = useReferral();
   const profileQuery = useNetworkProfile(wallet.currentAddress);
+  const statusQuery = usePresaleStatus();
+  const investedQuery = useTotalInvestment(wallet.currentAddress);
   const invalidate = useInvalidateAkn();
   const [inviter, setInviter] = useState(preset);
   const [invalid, setInvalid] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [directTab, setDirectTab] = useState("all");
+  const [directPage, setDirectPage] = useState(0);
   const profile = profileQuery.data;
+  const presaleReady = isContractConfigReady(["presale"]);
+  const decimals = statusQuery.data?.decimals;
+  const investmentPending = presaleReady && (investedQuery.isLoading || statusQuery.isLoading);
+  const personalInvestment = formatInvestment(
+    presaleReady ? investedQuery.data : null,
+    decimals,
+    investmentPending,
+  );
+  const directTotal = directTab === "active" ? profile?.activeDirectCount ?? 0 : profile?.directCount ?? 0;
+  const directPageCount = Math.max(1, Math.ceil(directTotal / DIRECT_PAGE_SIZE));
+  const currentDirectPage = Math.min(directPage, Math.max(0, directPageCount - 1));
+  const directsQuery = useDirectMemberPage(
+    wallet.currentAddress,
+    directTab,
+    currentDirectPage,
+    DIRECT_PAGE_SIZE,
+  );
   const inviteLink = wallet.currentAddress
     ? `${window.location.origin}/team?ref=${wallet.currentAddress}`
     : "";
@@ -35,6 +64,10 @@ export default function TeamPage() {
     if (!preset) return;
     setInviter(preset);
   }, [preset]);
+
+  useEffect(() => {
+    setDirectPage(0);
+  }, [wallet.currentAddress]);
 
   async function onConnect() {
     try {
@@ -73,20 +106,21 @@ export default function TeamPage() {
 
   async function onCopyInvite() {
     const copied = await copyText(inviteLink);
-    toast(copied ? t("邀请链接已复制", "Invite link copied") : t("复制失败，请手动复制", "Copy failed. Copy it manually"), copied ? "ok" : "err");
+    toast(copied ? t("复制成功", "Copied") : t("复制失败，请手动复制", "Copy failed. Copy it manually"), copied ? "ok" : "err");
   }
 
   return (
     <section className="view active">
       <div className="sec-title" style={{ marginTop: 16 }}><span className="bar" />{t("我的团队", "My team")}</div>
       <div className="mini-grid">
-        <div className="mini"><div className="l">{t("直推人数", "Direct referrals")}</div><div className="v">{profile ? profile.directCount : "--"}</div></div>
-        <div className="mini"><div className="l">{t("有效会员", "Active members")}</div><div className="v">{profile ? profile.activeDirectCount : "--"}</div></div>
-        <div className="mini"><div className="l">{t("团队业绩 (USDT)", "Team volume (USDT)")}</div><div className="v">--</div></div>
-        <div className="mini"><div className="l">{t("可享代数", "Reward levels")}</div><div className="v">--</div></div>
+        <div className="mini"><div className="l">{t("个人投资", "Personal investment")}</div><div className="v">{personalInvestment}</div></div>
+        <div className="mini"><div className="l">{t("用户级别", "User level")}</div><div className="v">--</div></div>
+        <div className="mini"><div className="l">{t("团队业绩", "Team volume")}</div><div className="v">--</div></div>
+        <div className="mini"><div className="l">{t("小区业绩", "Small-area volume")}</div><div className="v">--</div></div>
+        <div className="mini"><div className="l">{t("进入底池", "Pool inflow")}</div><div className="v">--</div></div>
       </div>
       {wallet.isConnected && !isContractConfigReady(["network"]) ? <div className="empty">{t(`缺少合约地址，请配置 ${getContractConfigMissingKeys(["network"]).join("、")}`, `Missing contract address. Configure ${getContractConfigMissingKeys(["network"]).join(", ")}`)}</div> : null}
-      {profileQuery.error ? <div className="empty">{getActionErrorMessage(profileQuery.error)}</div> : null}
+      {profileQuery.error || investedQuery.error ? <div className="empty">{getActionErrorMessage(profileQuery.error || investedQuery.error)}</div> : null}
 
       <div style={{ marginTop: 14 }}>
         {!wallet.isConnected ? (
@@ -120,7 +154,7 @@ export default function TeamPage() {
             <div className="kv"><span className="k">{t("我的地址", "My address")}</span><span className="v mono">{wallet.shortAddress}</span></div>
             <div className="field" style={{ marginTop: 13 }}>
               <label>{t("推荐人地址", "Referrer address")}</label>
-              <input className={`input${invalid ? " err" : ""}`} placeholder={t("0x…（仅邀请链接会自动带入）", "0x... (filled only from an invite link)")} value={inviter} onChange={(event) => { setInviter(event.target.value); setInvalid(false); }} />
+              <input className={`input${invalid ? " err" : ""}`} style={{ fontSize: 12 }} placeholder={t("0x…（仅邀请链接会自动带入）", "0x... (filled only from an invite link)")} value={inviter} onChange={(event) => { setInviter(event.target.value); setInvalid(false); }} />
               <div className="hint">{t("注册仅限一次、不可更改，请仔细核对。确认后支付 Gas 完成注册。", "Registration can only be done once and cannot be changed. Check the address, then pay gas.")}</div>
             </div>
             <button className="btn btn-blue" type="button" onClick={onRegister}>{t("确认注册并上链", "Register on-chain")}</button>
@@ -140,37 +174,51 @@ export default function TeamPage() {
               </svg>
             </button>
           </div>
-          <button className="btn btn-blue btn-sm" style={{ width: "100%", marginTop: 4 }} type="button" onClick={() => toast(t("邀请海报已生成（原型演示）", "Invite poster generated (preview)"))}>{t("保存邀请海报", "Save invite poster")}</button>
+          <button className="btn btn-blue btn-sm" style={{ width: "100%", marginTop: 4 }} type="button" onClick={onCopyInvite}>{t("复制邀请链接", "Copy invite link")}</button>
         </div>
       ) : null}
 
       <div className="card">
-        <h3><span className="bar" />{t("推荐规则", "Referral rules")}</h3>
-        <ul className="rule-list">
-          <li>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4BC4E" strokeWidth="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-            <span><b>{t("有效推荐", "Active referral")}</b>{t("：推荐人必须正在产生收益；已出局或未投资的空号向上紧缩。", ": The referrer must be earning. Inactive or exited accounts compress upward.")}</span>
-          </li>
-          <li>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12C45C" strokeWidth="2">
-              <path d="M12 2 2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-            <span>{t("直推 N 人即享 N 代，每代静态收益 ", "N direct referrals unlock N generations, each paying ")}<b>2%</b>{t("，烧伤机制，最高 ", " of static yield, with burn rules, up to ")}<b>15 {t("代", "generations")}</b>{t("。", ".")}</span>
-          </li>
-          <li>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#12C45C" strokeWidth="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-            <span>{t("代数奖在", "Generation rewards settle ")}<b>{t("领取静态收益时同步结算", "when static yield is claimed")}</b>{t("；紧缩部分奖给上方满足条件的地址。", ". Compressed rewards go to the next qualified address above.")}</span>
-          </li>
-        </ul>
+        <h3><span className="bar" />{t("直推地址", "Direct addresses")}</h3>
+        <div className="direct-tabs">
+          <button className={`direct-tab${directTab === "all" ? " on" : ""}`} type="button" onClick={() => { setDirectTab("all"); setDirectPage(0); }}>
+            <span>{t("直推数量", "Direct referrals")}</span>
+            <b>{profile ? profile.directCount : "--"}</b>
+          </button>
+          <button className={`direct-tab${directTab === "active" ? " on" : ""}`} type="button" onClick={() => { setDirectTab("active"); setDirectPage(0); }}>
+            <span>{t("有效直推数量", "Active direct referrals")}</span>
+            <b>{profile ? profile.activeDirectCount : "--"}</b>
+          </button>
+        </div>
+        {!wallet.isConnected ? <div className="empty">{t("连接钱包后查看直推地址。", "Connect a wallet to view direct referrals.")}</div>
+        : !isContractConfigReady(["network"]) ? null
+        : profileQuery.isLoading || (directTotal > 0 && directsQuery.isLoading) ? <div className="empty">{t("读取中…", "Loading...")}</div>
+        : directsQuery.error ? <div className="empty">{getActionErrorMessage(directsQuery.error)}</div>
+        : !directTotal ? <div className="empty">{directTab === "active" ? t("暂无有效直推。", "No active direct referrals.") : t("暂无直推地址。", "No direct referrals.")}</div>
+        : !directsQuery.data ? <div className="empty">{t("读取中…", "Loading...")}</div>
+        : (
+          <>
+            {directsQuery.data.map((member) => (
+              <div className="order" key={member.address}>
+                <div className="order-grid">
+                  <div className="og direct-wide"><div className="l">{t("钱包地址", "Wallet")}</div><div className="v direct-address">{member.address}</div></div>
+                  <div className="og"><div className="l">{t("个人投资", "Personal investment")}</div><div className="v">{formatInvestment(member.personalInvestment, decimals, presaleReady && statusQuery.isLoading)}</div></div>
+                  <div className="og"><div className="l">{t("用户级别", "User level")}</div><div className="v">--</div></div>
+                  <div className="og"><div className="l">{t("团队业绩", "Team volume")}</div><div className="v">--</div></div>
+                  <div className="og"><div className="l">{t("小区业绩", "Small-area volume")}</div><div className="v">--</div></div>
+                  <div className="og"><div className="l">{t("进入底池", "Pool inflow")}</div><div className="v">--</div></div>
+                </div>
+              </div>
+            ))}
+            {directTotal > DIRECT_PAGE_SIZE ? (
+              <div className="order-pager">
+                <button type="button" disabled={currentDirectPage === 0} onClick={() => setDirectPage(currentDirectPage - 1)}>{t("上一页", "Prev")}</button>
+                <span>{currentDirectPage + 1}/{directPageCount}</span>
+                <button type="button" disabled={currentDirectPage >= directPageCount - 1} onClick={() => setDirectPage(currentDirectPage + 1)}>{t("下一页", "Next")}</button>
+              </div>
+            ) : null}
+          </>
+        )}
       </div>
     </section>
   );

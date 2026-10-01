@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { parseUnits } from "viem";
 import ring from "../../assets/ring.png";
 import { getContractConfigMissingKeys, isContractConfigReady } from "../config/aknRuntime";
-import { MAX_INVEST, MIN_INVEST, PACKAGES, PREVIEW_BASE } from "../data/packages";
+import { MAX_INVEST, MIN_INVEST, PACKAGES } from "../data/packages";
 import { useInvalidateAkn, useLastInvestment, useNetworkProfile, usePresaleStatus, useUsdtBalance, useUserOrders } from "../hooks/useAknReads";
 import { useWalletConnector } from "../hooks/useWalletConnector";
 import { investPresale } from "../services/aknContracts";
@@ -88,13 +88,7 @@ export default function InvestPage() {
     return { ok: true, message: t("金额须为 1 的整数倍；可投多笔，每笔金额须大于等于上一笔。", "Amount must be a whole number. Each order must be at least the previous one.") };
   }, [amount, decimals, lastInvestmentQuery.data, lastInvestmentQuery.error, lastInvestmentQuery.isError, t, wallet.isConnected]);
 
-  const preview = amountState.ok && amount ? Number(amount) : 0;
   const selected = PACKAGES[packageIndex];
-  const ratioBase = preview || PREVIEW_BASE;
-  const radius = 46;
-  const circ = 2 * Math.PI * radius;
-  const investLen = (circ * selected.interact) / 100;
-  const insureLen = (circ * selected.insurance) / 100;
 
   async function onInvest() {
     if (!wallet.isConnected) {
@@ -169,7 +163,6 @@ export default function InvestPage() {
 
       <div className="card">
         <h3><span className="bar" />{t("选择方案并参与", "Choose a plan")}</h3>
-        <div className="sub-hd">{t(selected.tag, PACKAGE_EN[selected.tag] || selected.tag)} · {t(`投资 ${selected.interact}% / 保险 ${selected.insurance}%`, `Invest ${selected.interact}% / Insurance ${selected.insurance}%`)}</div>
         <div className="periods">
           {PACKAGES.map((item, index) => (
             <button key={item.tag} type="button" className={`period${index === packageIndex ? " on" : ""}`} onClick={() => setPackageIndex(index)}>
@@ -177,37 +170,7 @@ export default function InvestPage() {
             </button>
           ))}
         </div>
-        <div className="donut-panel">
-          <div className="donut">
-            <svg width="108" height="108" viewBox="0 0 108 108">
-              <circle cx="54" cy="54" r={radius} fill="none" stroke="url(#gInvest)" strokeWidth="12" strokeDasharray={`${investLen} ${circ - investLen}`} strokeDashoffset="0" />
-              <circle cx="54" cy="54" r={radius} fill="none" stroke="url(#gInsure)" strokeWidth="12" strokeDasharray={`${insureLen} ${circ - insureLen}`} strokeDashoffset={circ - investLen} />
-              <defs>
-                <linearGradient id="gInvest" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#0B7A42" />
-                  <stop offset="1" stopColor="#5EE89A" />
-                </linearGradient>
-                <linearGradient id="gInsure" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#8A6A1E" />
-                  <stop offset="1" stopColor="#F2CE6E" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="dc">{selected.rate}%</div>
-          </div>
-          <div className="donut-meta">
-            <div className="dm">
-              <div className="t"><span className="dot" style={{ background: "var(--brand-bright)" }} />{t("投资比例", "Investment")}</div>
-              <div className="p">{selected.interact}%</div>
-              <div className="a">{t(`投资 ${formatFixed((ratioBase * selected.interact) / 100, 0)} USDT`, `Invest ${formatFixed((ratioBase * selected.interact) / 100, 0)} USDT`)}</div>
-            </div>
-            <div className="dm">
-              <div className="t"><span className="dot" style={{ background: "var(--gold)" }} />{t("保险比例", "Insurance")}</div>
-              <div className="p">{selected.insurance}%</div>
-              <div className="a">{t(`保险 ${formatFixed((ratioBase * selected.insurance) / 100, 0)} USDT`, `Insurance ${formatFixed((ratioBase * selected.insurance) / 100, 0)} USDT`)}</div>
-            </div>
-          </div>
-        </div>
+        <div className="insurance-line">{t(`保险比例：${selected.insurance}%`, `Insurance ratio: ${selected.insurance}%`)}</div>
         <div className="field" style={{ marginTop: 14 }}>
           <label>{t("投资金额（USDT）", "Amount (USDT)")}</label>
           <div className="input-wrap">
@@ -230,12 +193,9 @@ export default function InvestPage() {
         <button className="btn btn-blue" type="button" disabled={submitting || closed || (Boolean(status) && !live)} onClick={onInvest}>
           {submitting ? <><span className="spin" />{t("链上确认中…", "Confirming...")}</> : t("确认参与预售", "Join presale")}
         </button>
-        <div className="note-box">
-          {t("资金分配：保险池部分进入保险池地址（开源丢权限，可随时在 DApp / 链上赎回，赎回后该笔订单结束、业绩消失）；交互合约部分 80% 中一半买币与剩余油组 LP 转黑洞，20% 至运营地址 USDT。", "Allocation: the insurance share goes to the insurance pool (open-source, permissions renounced, redeemable in the DApp or on-chain; redeeming ends that order and removes its volume). Of the interaction-contract share, half of the 80% buys tokens and the rest plus gas forms LP sent to the burn address; 20% is sent as USDT to the operations address.")}
-        </div>
       </div>
 
-      <div className="sec-title"><span className="bar" />{t("收益测算（预售期统一 1% / 24h，以 LP 结算）", "Yield preview (presale: 1% / 24h, settled in LP)")}</div>
+      <div className="sec-title"><span className="bar" /><span>{t("收益测算", "Yield preview")}<span className="sec-sub">{t("（预售期统一 1% / 24h，以 LP 结算）", " (presale: 1% / 24h, settled in LP)")}</span></span></div>
       <div className="card">
         <table className="est-table">
           <thead>
